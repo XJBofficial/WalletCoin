@@ -1,0 +1,1912 @@
+.Background {
+    background-color: #ffffff;
+    box-sizing: border-box;
+}
+
+.ClassicTitle{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 40px;
+    text-align: center;
+    color: #748585;
+}
+
+.BlackTitle {
+	font-family: Arial, Helvetica, sans-serif;
+    font-size: 35px;
+    text-align: center;
+    color: #454545;
+}
+
+.ClassicText {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 24px;
+    color: #24252e;
+}
+
+.Notification {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    color: #15191a;
+    text-align: center;
+}
+
+.FormInputTitle {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #9f9f9f;
+	font-size: 20px;
+	margin-top: 35px;
+}
+
+.WhiteTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    color: whitesmoke;;
+}
+
+.Button {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    font-size: 20px;
+    border-radius: 20px;
+    border: none;
+    padding: 14px 25px;
+    text-decoration: none;
+}
+
+
+/* The Paginator elements */
+
+.Paginator {
+    margin-left: 725px;
+}
+
+.PageTextPaginator {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+}
+
+.PaginationButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: whitesmoke;
+    text-decoration: none;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+}
+
+
+/* Walletcoin's site table design */
+
+.TableItem {
+    margin-bottom: 3px;
+    border: #839494 1px solid;
+    border-radius: 6px;
+}
+
+.TableItem ul {
+    display: flex;
+}
+
+.TableItem li {
+    padding-right: 130px;
+    list-style-type: none;
+}
+
+
+/* Input and Form elements */
+
+.Input {
+    background-color: #ededed;
+    width: 525px;
+    line-height: 21px;
+    padding: 16px 16px;
+    font-size: 16px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: none;
+    margin-top: 10px;
+}
+
+.Form {
+    border: #839494 1px solid;
+    border-radius: 5px;
+    margin-left: 650px;
+    padding: 40px;
+    width: 530px;
+}
+
+
+#paypal-button {
+    margin-left: 35%;
+}
+
+.CopyRight {
+    margin-bottom: auto;
+    margin-left: -10px;
+    width: 1905px;
+    height: 100%;
+}
+
+.SourcesTable {
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#WalletCoinTitle {
+    background-color: #131418;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+#WalletCoinTitleText {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #748585;
+  margin-left: 10px;  
+}
+
+#Sources {
+    background-color: #17181e;
+    text-align: center;
+}
+
+.SourcesTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    color: whitesmoke;
+    font-size: 24px;
+    text-align: center;
+    padding-right: 100px;
+}
+
+.SourceText {
+    font-family: Arial, Helvetica, sans-serif;
+    color: whitesmoke;
+    font-size: 18px;
+    text-align: center;
+    text-decoration: none;
+    padding-right: 100px;
+}
+
+#CopyRightTitle{
+    background-color: #17181e;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#CopyRightTitleText{
+    font-family: Arial, Helvetica, sans-serif;
+    color: whitesmoke;
+    margin-left: 10px;
+}
+
+
+/* ------------------------------------------- Frame Up Buttons ------------------------------------------- */
+
+.FrameUP {
+    background-color: #17181e;
+    padding-bottom: 27px;
+    margin-top: -10px;
+    margin-left: -10px;
+    height: 30px;
+    width: 1865px;
+    display: inline-flex;
+}
+
+.FrameUP li {
+    list-style-type: none;
+    margin-top: 20px;
+}
+
+
+.FrameButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #17181e;
+    color: whitesmoke;
+    text-decoration: none;
+    padding: 20px;
+    padding-right: 50px;
+    padding-left: 50px;
+}
+
+.FrameButton:hover {
+    background-color: #24252e;
+}
+
+.SubMenuLi:hover .SubMenu {
+    background-color: #17181e;
+    margin-top: 39px;
+    position: absolute;
+    display: block;
+}
+
+.SubMenuLi:hover .SubMenu .FrameButton {
+    width: 100%;
+}
+
+.SubMenu {
+    display: none;
+}
+
+
+#SubMenuPaddingBottom {
+    padding-bottom: 40px;
+}
+
+
+/* ------------------------------------------- Index Page ------------------------------------------- */
+
+.Index-Icon {
+    background-image: url(https\:\/\/cdn1\.poloniex\.com\/prod\/assets\/images\/homepage-bg-lg-2021-2\.svg);
+    margin-top: -10px;
+    margin-left: -10px;
+    padding-top: 30px;
+    width: 1905px;
+}
+
+#Index-RegisterLoginButtons {
+    margin-top: 40px;
+    margin-left: 43.5%;
+}
+
+#Index-IconDiv .WhiteTitle {
+    margin-top: 40px;
+}
+
+.Index-Text {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 24px;
+    color: #f5f5f5;
+}
+
+.IndexCurrencyPricePanel {
+    border: #839494 1px solid;
+    padding: 30px;
+    border-radius: 20px;
+    margin-left: 28.5%;
+	display: inline-flex;
+}
+
+.Index-CurrencyPricePanel {
+    border: #748585 1px solid;
+    border-radius: 5px;
+    padding: 20px;
+    margin-right: 15px;
+}
+
+#IndexCurrencyPricePanel-Icon img {
+	margin-top: 30px;
+    margin-left: 30%;
+	width: 80px;
+	height: 80px;
+}
+
+
+.PriceInBitcoin {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 24px;
+    color: #f7911a;
+}
+
+.PriceInEthereum {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 24px;
+    color: #323232;
+}
+
+.PriceInDogecoin {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 24px;
+    color: #c2a633;
+}
+
+
+.PriceInBitcoin a {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 24px;
+    color: #ff8800;
+}
+
+.PriceInEthereum a {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 24px;
+    color: #242424;
+}
+
+.PriceInDogecoin a {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 24px;
+    color: #d4b740;
+}
+
+
+.Index-WhatIsWalletCoin {
+    margin-top: 76px;
+    margin-left: 28%;
+    width: 880px;
+}
+
+#Index-WhatIsWalletCoin-Text {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+    font-size: 20px;
+    margin-top: 50px;
+}
+
+#Index-WhatIsWalletCoin-Text strong {
+    font-size: 25px;
+    margin-bottom: 10px;
+}
+
+#Index-WhatIsWalletCoin-TextDiv {
+    padding-bottom: 10px;
+}
+
+.Index-WhatIsWalletCoin #Index-WhatIsWalletCoin-Buttons {
+    margin-top: 50px;
+    margin-left: 250px;
+}
+
+.Index-WalletCoinValuePanel {
+    background-color: #839494;
+    margin-top: 80px;
+    display: inline-flex;
+    width: 100%;
+    height: 300px;
+}
+
+.Tokens {
+    margin-left: 330px;
+    padding: 40px;
+}
+
+.Tokens #TokensTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #e4e4e4;
+    text-align: center;
+    font-size: 35px;
+}
+
+.Tokens #TokensText {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #e4e4e4;
+    text-align: center;
+    font-size: 22px;
+}
+
+
+.Market {
+    padding: 40px;
+}
+
+.Market #MarketTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #e4e4e4;
+    text-align: center;
+    font-size: 35px;
+}
+
+.Market #MarketText {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #e4e4e4;
+    text-align: center;
+    font-size: 22px;
+}
+
+
+.Bought {
+    padding: 40px;
+}
+
+.Bought #BoughtTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #e4e4e4;
+    text-align: center;
+    font-size: 35px;
+}
+
+.Bought #BoughtText, #BoughtValue {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #e4e4e4;
+    text-align: center;
+    font-size: 22px;
+}
+
+
+.Sold {
+    padding: 40px;
+}
+
+.Sold #SoldTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #e4e4e4;
+    text-align: center;
+    font-size: 35px;
+}
+
+.Sold #SoldText, #SoldValue {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #e4e4e4;
+    text-align: center;
+    font-size: 22px;
+}
+
+
+/* ------------------------------------------- Register-Login Form ------------------------------------------- */
+
+#RegisterLoginNotification {
+    text-align: center;
+    margin-top: 50px;
+}
+
+
+#CreateAccountUrl {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    color: #748585;
+    text-decoration: none;
+    padding-top: 20px;
+}
+
+
+#DontHaveAccountUrl {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    color: #748585;
+    text-decoration: none;
+    padding-top: 20px;
+}
+
+.RegisterButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.RegisterButton:hover {
+    background-color: #839494;
+}
+
+.LoginButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.LoginButton:hover {
+    background-color: #839494;
+}
+
+
+/* ------------------------------------------- Trading Form ------------------------------------------- */
+
+.BuyWalletCoins {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.BuyWalletCoins:hover {
+    background-color: #839494;
+}
+
+.SellWalletCoins {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.SellWalletCoins:hover {
+    background-color: #839494;
+}
+
+
+/* ---------------------------------------- FAQ questions page ------------------------------------------ */
+
+.FAQquestion {
+    font-family: Arial, Helvetica, sans-serif;
+    border: #5b6060 1px solid;
+    color: whitesmoke;
+    padding: 10px;
+    margin-top: 15px;
+    margin-left: 450px;
+    border-radius: 20px;
+    width: 900px;
+}
+
+#FAQquestionTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+} 
+
+#FAQreplication {
+    display: none;
+}
+
+.FAQquestion:hover #FAQreplication {
+    display: block;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    color: #808f8f;
+    border-radius: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 900px;
+}
+
+
+/* ---------------------------------------- Create a new Game ----------------------------------------- */
+
+.PromoteGameNotification {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #24252e;
+    font-size: 18px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+#CreateGameButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+#CreateGameButton:hover {
+    background-color: #839494;
+}
+
+
+/* ---------------------------------------- The dashboard with all games --------------------------------------- */
+
+.MyGamesList {
+    background-color: #17181e;
+    top: 0;
+    left: 0;
+    width: 345px;
+    height: 1000px;
+    position: fixed;
+}
+
+.GameDashBoard {
+    margin-left: 350px;
+    margin-bottom: 1.7rem;
+    padding-left: 2rem;
+}
+
+
+.MyGamesDashboardHeader {
+    background-color: #24252e;
+    height: 70px;
+    margin-top: -16px;
+    margin-left: -60px;
+    box-sizing: inherit;
+}
+
+.MyGamesDashboardHeader ul {
+    display: flex;
+}
+
+.MyGamesDashboardHeader li {
+    list-style-type: none;
+    margin-top: 25px;
+}
+
+.MyGamesDashboardHeader #MyGamesDashboardHeaderButton {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 100%;
+    background-color: #748585;
+    color: whitesmoke;
+    margin-top: 20px;
+    margin-left: 10px;
+    text-decoration: none;
+    text-align: center;
+    padding: 20px;
+    border-radius: 4px;
+}
+
+.MyGamesDashboardHeader #MyGamesDashboardHeaderButton:hover {
+    background-color: #839494;
+}
+
+#MyGamesDashboardHeader-SearchGame {
+    margin-top: -1px;
+    margin-left: 650px;
+}
+
+#MyGamesDashboardHeader-SearchGame .Input {
+    width: 350px;
+}
+
+
+.ExploreGamesHeader {
+	width: 100%;
+}
+
+.ExploreGamesHeader form {
+	margin-left: 30%;
+}
+
+.MyGamesDashboardHeader-SearchButton {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 100%;
+    background-color: #748585;
+    color: whitesmoke;
+    text-align: center;
+    padding: 18px;
+    border-radius: 4px;
+    border: none;
+}
+
+.ExploreGames-Controls {
+    background-color: #21232d;
+    margin-top: 50px;
+    margin-left: -45px;
+    height: 50px;
+}
+
+.ExploreGames-ControlsList {
+    display: inline-flex;
+    list-style-type: none;
+}
+
+#MostValuedGames, #TrendGames {
+	font-family: Arial, Helvetica, sans-serif;
+	background-color: transparent;
+    border: #161616 1px solid;
+    border-radius: 5px;
+    padding: 15px 30px;
+    margin-top: -16px;
+    color: whitesmoke;
+}
+
+#MostValuedGames:hover, #TrendGames:hover {
+    background-color: #17181e;
+}
+
+.ExploreGamesResults {
+    margin-top: 50px;
+}
+
+.ExploreGamesSection {
+    display: inline-flex;
+    margin-top: 15px;
+}
+
+#ExploreGamesGame {
+    border: #323232 1px solid;
+    display: list-item;
+    width: 329px;
+    height: 320px;
+    margin-left: 15px;
+}
+
+#ExploreGamesGameIcon {
+    width: 329px;
+    height: 250px;
+}
+
+#ExploreGamesGameName {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #454545;
+    margin-top: 15px;
+    margin-left: 10px;
+}
+
+#ExploreGamesGameValue {
+    display: inline-flex;
+    margin-top: 15px;
+    margin-left: 10px;
+}
+
+#ExploreGamesGameValueSPAN {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+}
+
+
+.Game {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    background-color: #17181e;
+    border-radius: 4px;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    width: 300px;
+}
+
+.Game:hover {
+    background-color: #21232b;
+}
+
+.Game a {
+    color: whitesmoke;
+    text-decoration: none;
+}
+
+/* The Games Table and the "Create New Game" button elements which */
+/* are shown when user open the page */
+
+
+#NewGameInDashboard {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: whitesmoke;
+    margin-top: 100px;
+    margin-left: 600px;
+    text-decoration: none;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+#NewGameInDashboard:hover {
+    background-color: #839494;
+}
+
+.MyGamesTable {
+    margin-left: 3%;
+}
+
+.MyGamesTable div {
+    width: 1400px;
+}
+
+.MyGamesTable #ViewCurrentGamesDashboard {
+    font-family: Arial, Helvetica, sans-serif;
+    margin-top: 1.5%;
+}
+
+.MyGamesTable #ViewCurrentGamesDashboard a {
+    color: #9ec2f9;
+}
+
+/* ---------------------------------------------------------------------------- */
+
+#GameName {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+}
+
+#GamePlayings {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+}
+
+
+.StockStatistics {
+    display: inline-flex;
+}
+
+.StockStatistics #Stock-StatisticsWall {
+    border: #839494 1px solid;
+    border-radius: 5px;
+    margin-left: 10px;
+    width: 462px;
+}
+
+.StockStatistics-Price {
+    display: inline-flex;
+}
+
+.StockStatistics-Trade {
+    display: inline-flex;
+}
+
+
+.StockStatistics-Price #PriceChange {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    margin-top: 50px;
+    margin-left: 50px;
+}
+
+.StockStatistics-Price #StockVolume {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    margin-top: 50px;
+    margin-left: 80px;
+}
+
+.StockStatistics-Trade #WalletCoinsBought {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #78d378;
+    margin-top: 30px;
+    margin-left: 50px;
+}
+
+.StockStatistics-Trade #WalletCoinsSold {
+    font-family: Arial, Helvetica, sans-serif;
+    color: red;
+    margin-top: 30px;
+    margin-left: 80px;
+}
+
+
+.BuyStocksText-Title {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #323232;
+    margin-left: 50px;
+}
+
+.BuyStocks-InvestionWays {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    font-size: 18px;
+    padding-bottom: 30px;
+    margin-left: 30px;
+    list-style-type: circle;
+}
+
+.BuyStocks-InvestionWays li {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.BuyStocks .BuyStocksButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border-radius: 5px;
+    border: none;
+    padding: 20px 150px;
+    margin-left: 60px;
+    text-decoration: none;
+}
+
+.BuyStocks .BuyStocksButton:hover {
+    background-color: #839494;
+}
+
+
+.StockPrice {
+    display: inline-flex;
+    margin-top: 30px;
+}
+
+.StockPrice .StockPrice-Value {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    color: #13181e;
+}
+
+.StockPrice .StockPrice-Value h1 {
+    margin-top: -14px;
+    margin-left: 20px;
+}
+
+
+/* ---------------------------------------------------------------------------- */
+
+
+.Buy-Sell-StocksTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 30px;
+    text-align: center;
+    color: #748585;
+}
+
+.Buy-Sell {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    background-color: #17181e;
+    border-radius: 5px;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    width: 300px;
+}
+
+
+.Buy-Sell-Stocks hr {
+    width: 600px;
+    margin-left: 23%;
+}
+
+.Buy-Sell-Stocks-Title {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+    margin-left: 36%;
+    font-size: 40px;
+}
+
+.BuyStocksForm {
+    border: #839494 1px solid;
+    border-radius: 5px;
+    margin-left: 350px;
+    padding: 40px;
+    width: 530px;
+}
+
+.SellStocksForm {
+    border: #839494 1px solid;
+    border-radius: 5px;
+    margin-left: 350px;
+    padding: 40px;
+    width: 530px;
+}
+
+
+.Buy-Sell a {
+    color: whitesmoke;
+    text-decoration: none;
+}
+
+.Buy-Sell:hover {
+    background-color: #21232b;
+}
+
+.Buy-Sell-StocksHeader {
+    border: #839494 1px solid;
+    margin-left: 23%;
+    padding-top: 10px;
+    width: 610px;
+    height: 30px;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+}
+
+.Buy-Sell-StocksHeader a {
+    font-family: Arial, Helvetica, sans-serif;
+    border: #839494 1px solid;
+    color: #21232d;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+.Buy-Sell-StocksHeader a:hover {
+    background-color: #ededed;
+    color: #161616;
+}
+
+.Buy-Sell-StocksBuyButton {
+    margin-left: 10px;
+}
+
+.Buy-Sell-StocksSubmit {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.Buy-Sell-StocksSubmit:hover {
+    background-color: #839494;
+}
+
+.IssueStocks {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    background-color: #17181e;
+    border-radius: 4px;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    width: 300px;
+}
+
+.IssueStocks a {
+    color: whitesmoke;
+    text-decoration: none;
+}
+
+.IssueStocks:hover {
+    background-color: #21232b;
+}
+
+
+.IssueStocksForm {
+    border: #839494 1px solid;
+    border-radius: 5px;
+    margin-left: 350px;
+    padding: 40px;
+    width: 530px;
+}
+
+.IssueStocksTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+    text-align: center;
+    font-size: 30px;
+}
+
+.IssueStocksSubmit {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.IssueStocksSubmit:hover {
+    background-color: #839494;
+}
+
+
+.GameSettings {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    background-color: #17181e;
+    border-radius: 4px;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    width: 300px;
+}
+
+.GameSettings a {
+    color: whitesmoke;
+    text-decoration: none;
+}
+
+.GameSettings:hover {
+    background-color: #21232b;
+}
+
+/* ------------------------------------- My Game page and its description ------------------------------------- */
+
+.GamePageHeader {
+    background-color: #17181e;
+    margin-left: -45px;
+}
+
+.GamePageHeader-Name {
+    display: inline-flex;
+}
+
+.GamePageHeader-Name #GameName {
+    margin-top: 40px;
+}
+
+#GameImage {
+    width: 70px;
+    height: 70px;
+    padding: 20px;
+}
+
+.GamePage-Controls {
+    background-color: #21232d;
+    margin-left: -45px;
+    height: 50px;
+}
+
+.GamePage-ControlsList {
+    display: inline-flex;
+    list-style-type: none;
+}
+
+#GamePage-ControlsButton {
+    border: #161616 1px solid;
+    border-radius: 5px;
+    padding: 15px 30px;
+    margin-top: -16px;
+}
+
+#GamePage-ControlsButton:hover {
+    background-color: #17181e;
+}
+
+#GamePage-ControlsButton a {
+    font-family: Arial, Helvetica, sans-serif;
+    text-decoration: none;
+    color: whitesmoke;
+}
+
+
+/* ------------------------------------- The page of creator of the game ------------------------------------- */
+
+.GameCreatorPageHeader {
+    background-color: #17181e;
+    margin-left: -45px;
+}
+
+.GameCreatorPageHeader-Name {
+    display: inline-flex;
+}
+
+.GameCreatorPageHeader-Name #GameCreatorName {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+    margin-top: 40px;
+}
+
+#GameCreatorImage {
+    width: 70px;
+    height: 70px;
+    padding: 20px;
+}
+
+.CreatorGamesList {
+    display: inline-flex;
+    list-style-type: none;
+}
+
+#CreatorGamesList-Item {
+    border: #21232b 1px solid;
+    border-radius: 10px;
+    width: 300px;
+    height: 200px;
+    text-align: center;
+    margin-left: 5px;
+}
+
+#CreatorGamesList-Item a {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #17181e;
+    text-decoration: none;
+    font-size: 22px;
+}
+
+
+/* ------------------------------------------- The Game settings ------------------------------------------- */
+
+.GameSettingsForm {
+	margin-left: -300px;
+}
+
+.GameIconField {
+    margin-top: 50px;
+}
+
+.GameNameField {
+    margin-top: 50px;
+}
+
+.GameDescriptionField {
+    margin-top: 50px;
+}
+
+#GameSettings-Description {
+	background-color: #ededed;
+    width: 525px;
+	height: 300px;
+    line-height: 21px;
+    padding: 16px 16px;
+    font-size: 16px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: none;
+    margin-top: 10px;
+}
+
+#ApplySettingsButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+#ApplySettingsButton:hover {
+    background-color: #839494;
+}
+
+
+/* ----------------------------------------------- User settings ----------------------------------------------- */
+
+.UserSettings-InputField {
+	margin-top: 40px;
+}
+
+#UserSettings-PasswordManagement {
+	margin-top: 20px;
+}
+
+.UserSettings-WalletAndApiKey {
+	margin-top: 50px;
+	padding-bottom: 30px;
+}
+
+#UserSettings-WalletAndApiKeyManagement {
+	margin-top: 20px;
+}
+
+.UserSettings-EmailSent {
+    border: #839494 1px solid;
+    border-radius: 5px;
+    margin-left: 33.5%;
+    padding: 20px;
+    width: 606px;
+}
+
+#UserSettings-EmailSendParagraph {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #5b6060;
+    font-size: 20px;
+}
+
+.UserSettings-DataChanged {
+    border: #839494 1px solid;
+    border-radius: 5px;
+    margin-left: 33.5%;
+    padding: 20px;
+    width: 606px;
+}
+
+#UserSettings-DataChangedParagraph {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #5b6060;
+    font-size: 20px;
+}
+
+
+#UserSettings-EmailSentConfirmationCode-Div {
+    margin-left: 35px;
+}
+
+
+.UserSettings-EmailSentConfirmationCode-Submit {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.UserSettings-EmailSentConfirmationCode-Submit:hover {
+    background-color: #839494;
+}
+
+
+/* -------------------------------------------- The Blockchain table -------------------------------------------- */
+
+
+#Show-Hide-PrivateData {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 280px;
+}
+
+#Show-Hide-PrivateData:hover {
+    background-color: #839494;
+}
+
+
+#BlockchainDataText {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+    font-size: 20px;
+    margin-top: 50px;
+}
+
+.BlockchainTable {
+    margin-top: 30px;
+    width: 100%;
+}
+
+.BlockchainHead {
+    background-color: #748585;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #24252e;
+    font-size: 20px;
+    border-radius: 10px;
+}
+
+.Blockchain tr {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #808f8f;
+    text-align: center;
+}
+
+.BlockData {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    font-size: 20px;
+    padding-top: 40px;
+}
+
+.BlockNumber {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 30px;
+    color: #464646;
+}
+
+
+.BlockContainerTable {
+    margin-top: 50px;
+    width: 100%;
+}
+
+.BlockContainerHead {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #839494;
+    color: #24252e;
+    font-size: 20px;
+}
+
+.BlockContainerBody #BlockContainerBodyTR {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #808f8f;
+    text-align: center;
+}
+
+.SendWalletCoins {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.SendWalletCoins:hover {
+    background-color: #839494;
+}
+
+
+/* -------------------------------------------- The Value Chart -------------------------------------------- */
+
+#Chart {
+    display: block;
+    border: #839494 1px solid;
+    border-radius: 5px;
+    width: 900px;
+    height: 500px;
+}
+
+.ValueChartTimes ul {
+    display: inline-flex;
+}
+
+#ValueChartToday {
+    margin-left: 418px;
+}
+
+#ValueChartToday, #ValueChartThisWeek, #ValueChartThisMonth, #ValueChartThisYear {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    background-color: transparent;
+    color: #839494;
+    padding: 10px 20px 10px 20px;
+    border: #748585 1px solid;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+#ValueChartToday:hover, #ValueChartThisWeek:hover, #ValueChartThisMonth:hover, #ValueChartThisYear:hover {
+    background-color: whitesmoke;
+}
+
+#ValueChartTimeButton {
+    list-style-type: none;
+    margin-left: 3px;
+    margin-bottom: -6px;
+}
+
+
+/* -------------------------------------------- Requests Api -------------------------------------------- */
+
+.REST-API-Page {
+    display: inline-flex;
+}
+
+
+.REST-API-GetPrice {
+    padding-top: 10px;
+    padding-bottom: 110px;
+}
+
+
+.REST-API-GetPriceChart {
+    padding-bottom: 760px;
+}
+
+#PriceChartResponse-Stats {
+    margin-left: 10px;
+}
+
+
+.REST-API-Auth {
+    padding-bottom: 110px;
+}
+
+.REST-API-CreateWallet {
+    padding-bottom: 40px;
+}
+
+.REST-API-ConnectWallet {
+    padding-bottom: 32px;
+}
+
+.REST-API-Transaction {
+    padding-bottom: 20px;
+}
+
+
+#RequestDescription-Text {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #24252e;
+    font-size: 18px;
+    padding-bottom: 30px;
+}
+
+
+.REST-API-Request strong {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    color: #24252e;
+}
+
+
+.REST-API-Requests {
+    padding-left: 150px;
+}
+
+.REST-API-Responses {
+    width: 1108px;
+}
+
+.REST-API-Response {
+    background-color: #13181e;
+    margin-left: 10px;
+    padding-bottom: 3px;
+}
+
+
+/* The Request-Response elements */
+
+.RequestTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #0e1116;
+    color: #bbbbbb; 
+    font-size: 22px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}
+
+.RequestUrl {
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgb(177, 151, 6);
+    padding-left: 10px;
+}
+
+.ExampleResponseTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #0e1116;
+    color: #bbbbbb;
+    font-size: 22px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}
+
+.ResultText {
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgb(206, 205, 205);
+    padding-left: 10px;
+}
+
+
+/* The Request description elements */
+
+.RequestFunctionTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 22px;
+    color: #323232;
+}
+
+.RequestFunctionDesc {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 22px;
+    color: #161616;
+}
+
+#RequestMethod {
+    color: #839494;
+    padding: 2.5px;
+    border: #24252e 1px solid;
+    border-radius: 5px;
+}
+
+#RequestURL {
+    color: #748585;
+}
+
+.RequestArguments {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    color: #808f8f;
+}
+
+
+/* ---------------------------------------- About WalletCoin ---------------------------------------- */
+
+.AboutWalletCoin {
+    margin-left: 79px;
+    width: 1716px;
+}
+
+.WhatIsWalletCoin {
+    padding-top: 30px;
+    padding-bottom: 50px;
+}
+
+.WhatIsWalletCoin .ClassicText {
+    color: #21232b;
+    margin-top: 100px;
+    margin-right: -100px;
+}
+
+.WhatIsWalletCoin .ClassicText strong {
+    color: #5b6060;
+    font-size: 30px;
+    text-align: left;
+    margin-left: -380px;
+}
+
+.WhatIsWalletCoin .ClassicText #AboutWalletCoin-P {
+    font-size: 22px;
+    text-align: left;
+    margin-left: 500px;
+}
+
+#WhatIsWalletCoin-Icon {
+    margin-top: -400px;
+    width: 500px;
+    height: 450px;
+}
+
+.InvestInWalletCoin {
+    padding-bottom: 80px;
+}
+
+.InvestInWalletCoin .ClassicText {
+    color: #21232b;
+    margin-top: 37px;
+    margin-left: -900px;
+}
+
+.InvestInWalletCoin .ClassicText strong {
+    color: #5b6060;
+    font-size: 30px;
+    text-align: left;
+    margin-left: -110px;
+}
+
+.InvestInWalletCoin .ClassicText #AboutWalletCoin-P {
+    font-size: 22px;
+    text-align: left;
+    margin-left: 950px;
+}
+
+#InvestInWalletCoin-Icon {
+    width: 500px;
+    height: 450px;
+    margin-top: -500px;
+    margin-left: 1000px;
+}
+
+.SecureNetworkForAll .ClassicText {
+    color: #21232b;
+    margin-top: 150px;
+    margin-right: -90px;
+}
+
+.SecureNetworkForAll .ClassicText strong {
+    color: #5b6060;
+    font-size: 30px;
+    text-align: left;
+    margin-left: 40px;
+}
+
+.SecureNetworkForAll .ClassicText #AboutWalletCoin-P {
+    font-size: 22px;
+    text-align: left;
+    margin-left: 600px;
+}
+
+#SecureNetworkForAll-Icon {
+    margin-top: -400px;
+    margin-left: 50px;
+    width: 450px;
+    height: 400px;
+}
+
+
+/* -------------------------------------------- WalletCoin Price Chart -------------------------------------------- */
+
+.PriceChartBackground {
+    background-color: white;
+    margin-left: 110px;
+}
+
+.FrameUP-PriceChart {
+    background-color: #17181e;
+    padding-bottom: 27px;
+    margin-top: -10px;
+    margin-left: -110px;
+    height: 30px;
+    width: 1902px;
+    display: inline-flex;
+}
+
+.FrameUP-PriceChart .FrameUP {
+    margin-top: 0px;
+}
+
+.CopyRight-PriceChart {
+    box-sizing: border-box;
+    margin-bottom: auto;
+    margin-left: -110px;
+    width: 1902px;
+}
+
+.WalletCoinPrice {
+    display: inline-flex;
+    margin-top: 30px;
+}
+
+.Price-Changing #Price-Changing-Icon {
+    width: 20px;
+    height: 18px;
+}
+
+.Price-Changing #Price-Increased {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #31d476;
+}
+
+.Price-Changing #Price-Decreased {
+    font-family: Arial, Helvetica, sans-serif;
+    color: red;
+}
+
+.WalletCoinPrice .WalletCoinPrice-Value {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    color: #13181e;
+}
+
+.WalletCoinPrice .WalletCoinPrice-Value h1 {
+    margin-top: -14px;
+    margin-left: 20px;
+}
+
+
+.StatisticsWall {
+    width: 900px;
+    height: 160px;
+    border: #839494 1px solid;
+    border-radius: 4px;
+    display: flow-root;
+}
+
+.StatisticsWall ul {
+    display: flex;
+    padding-bottom: 10px;
+}
+
+.StatisticsWall #TimeFrame {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    margin-left: 50px;
+}
+
+.StatisticsWall #PriceChange {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    margin-left: 165px;
+}
+
+.StatisticsWall #WalletCoinVolume {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    margin-left: 65px;
+}
+
+.StatisticsWall #WalletCoinsBought {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #78d378;
+    margin-left: 50px;
+}
+
+.StatisticsWall #WalletCoinsSold {
+    font-family: Arial, Helvetica, sans-serif;
+    color: red;
+    margin-left: 80px;
+}
+
+.StatisticsWall #WalletCoinPrice {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    margin-left: 80px;
+}
+
+
+.TradingPanel {
+    margin-top: -670px;
+    margin-left: 920px;
+    border: #839494 1px solid;
+    border-radius: 5px;
+    width: 450px;
+    height: 330px;
+}
+
+.TradingPanel h2 {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    margin-left: 30px;
+}
+
+#TradingPanelText-InvestionWays {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    font-size: 18px;
+    padding-bottom: 30px;
+    margin-left: 30px;
+    list-style-type: circle;
+}
+
+#TradingPanelText-InvestionWays li {
+    padding-bottom: 10px;
+}
+
+.TradingPanel .BuyButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border-radius: 5px;
+    border: none;
+    padding: 20px 150px;
+    margin-left: 60px;
+    text-decoration: none;
+}
+
+.TradingPanel .BuyButton:hover {
+    background-color: #839494;
+}
+
+.TradingPanel .TradingPanelText {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #21232b;
+}
+
+
+#InvestionURL {
+    text-decoration: none;
+}
+
+#InvestionName {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #21232b;
+    font-size: 18px;
+    margin-left: 20px;
+}
+
+#InvestionOwner {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+    font-size: 17px;
+    margin-left: 20px;
+}
+
+#InvestionValue {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+    font-size: 18px;
+    margin-top: 18px;
+    margin-left: 40px;
+}
+
+
+/* ----------------------------------------------- Help Center ----------------------------------------------- */
+
+#HelpCenter-Form .ClassicText {
+    font-size: 16px;
+    padding-bottom: 20px;
+}
+
+#HelpCenter-Form .HelpCenter-InputField {
+    margin-top: 10px;
+    padding-bottom: 20px;
+}
+
+.HelpCenter-Email {
+    background-color: #ededed;
+    width: 525px;
+    line-height: 21px;
+    padding: 16px 16px;
+    font-size: 16px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: none;
+    margin-top: 10px;
+}
+
+.ReportProblemButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.ReportProblemButton:hover {
+    background-color: #839494;
+}
