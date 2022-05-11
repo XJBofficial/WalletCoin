@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="../static/style.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+    <title>WalletCoin - Blockchain</title>
+  </head>
+
+  <body class="Background">
+    <header>
+        <ul class="FrameUP">
+            <li class="FrameUPDashboard">
+                <a class="FrameButton" href="dashboard">
+                    <strong>Dashboard</strong>
+                </a>
+            </li>
+
+            <li class="FrameUPTransaction">
+                <a class="FrameButton" href="transaction">
+                    <strong>Transaction</strong>
+                </a>
+            </li>
+
+            <li class="SubMenuLi">
+                <a class="FrameButton">
+                    <strong>Trading</strong>
+                </a>
+
+                <div class="SubMenu">
+                    <a class="FrameButton" href="buy">
+                        <strong>Buy</strong>
+                    </a>
+                    <div id="SubMenuPaddingBottom"></div>
+
+                    <a class="FrameButton" href="sell">
+                        <strong>Sell</strong>
+                    </a>
+                </div>
+            </li>
+
+            <li class="SubMenuLi">
+                <a class="FrameButton">
+                    <strong>Games</strong>
+                </a>
+
+                <div class="SubMenu">
+                    <a class="FrameButton" href="myGamesDashboard">
+                        <strong>My Games</strong>
+                    </a>
+                    <div id="SubMenuPaddingBottom"></div>
+
+                    <a class="FrameButton" href="createGame">
+                        <strong>Create</strong>
+                    </a>
+                </div>
+            </li>
+            
+			<li class="FrameUPUserSettings">
+				<a class="FrameButton" href="settings">
+					<strong>Settings</strong>
+				</a>
+			</li>
+			
+            <li class="FrameUPLogout">
+                <a class="FrameButton" href="logout">
+                    <strong>Logout</strong>
+                </a>
+            </li>
+        </ul>
+    </header>
+
+
+    <div>
+      {% block body %}
+
+      {% endblock %}
+    </div><br>
+
+    <div style="padding-bottom: 90px;"></div>
+    <div class="CopyRight">
+      <div id="WalletCoinTitle">
+          <h2 id="WalletCoinTitleText">WalletCoin</h2>
+      </div>
+      <div id="Sources">
+          <br>
+
+          <table class="SourcesTable">
+              <tr class="Sources-Sources">
+                  <th class="SourcesTitle">Sources</th>
+                  <th class="SourcesTitle">About</th>
+                  <th class="SourcesTitle">Community</th>
+              </tr>
+
+              <tr class="Sources-Line-0">
+                  <td class="SourcesItem">
+                      <a class="SourceText" href="RESTfulApi">Rest Api</a>
+                  </td>
+                  <td class="SourcesItem">
+                      <a class="SourceText" href="About">About</a>
+                  </td>
+                  <td class="SourcesItem">
+                      <a class="SourceText"
+                          href="https://www.youtube.com/channel/UC2tFLggEqPZw3w83dGvPteQ">Youtube</a>
+                  </td>
+              </tr>
+
+              <tr class="Sources-Line-1">
+                  <td class="SourcesItem"></td>
+                  <td class="SourcesItem">
+                      <a class="SourceText" href="FAQ">FAQ</a>
+                  </td>
+                  <td class="SourcesItem">
+                      <a class="SourceText">Discord</a>
+                  </td>
+              </tr>
+
+              <tr class="Sources-Line-2">
+                <td></td>
+                <td class="SourcesItem">
+                    <a class="SourceText" href="helpCenter">Help Center</a>
+                </td>
+                  <td class="SourcesItem">
+                      <a class="SourceText">Instagram</a>
+                  </td>
+              </tr>
+          </table>
+          <br><br>
+      </div>
+
+      <div id="CopyRightTitle">
+          <span id="CopyRightTitleText">
+              <strong>Copyright © WalletCoin 2021</strong>
+            </span>
+      </div>
+  </div>
+
+  </body>
+</html>

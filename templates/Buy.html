@@ -1,0 +1,134 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<head>
+  <link href="../static/style.css" rel="stylesheet">
+  <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+
+
+<div id="Buy-Wallets">
+  <h3 class="ClassicTitle">Payment Method</h3>
+  <p class="ClassicText">
+    Buy some WalletCoins with cryptocurrencies and start investing in your<br>
+    favourite game. Ofcourse soon WalletCoin will add new payment methods.
+  </p>
+  <div style="padding-bottom: 40px;"></div>
+
+  <button id="Buy-MetaMask" type="button">MetaMask</button>
+
+  <div class="Form">
+    <h1 class="ClassicTitle">Buy WalletCoins</h1>
+    <div style="padding-bottom: 20px;"></div>
+
+
+    <div id="Buy-Balance">
+      <p class="ClassicText">
+        <strong>Your balance: {{ Balance }} WLLC</strong>
+      </p>
+    </div>
+
+
+    <input class="Input" id="Amount" type="number" name="amount" placeholder="Amount" value="" required>
+    <div style="padding-bottom: 20px;"></div>
+
+
+    {% for message in get_flashed_messages() %}
+      <span class="Notification">
+        <strong>{{ message }}</strong>
+      </span>
+      {% endfor %}
+
+
+    <div style="padding-bottom: 40px;"></div>
+    <button class="BuyWalletCoins">Buy WalletCoins</button>
+    <div id="Buy-PaymentStatus"></div>
+  </div>
+
+
+  <script type="text/javascript">
+    var MetaMask = document.getElementById("Buy-MetaMask");
+    var Form = document.querySelector(".Form");
+    var Amount = document.querySelector(".Form #Amount");
+
+
+    let CoinValue = {{ Price }};
+    let PaymentMethod = "MetaMask";
+
+
+    //$(".Form").style.display = "none";
+    
+    function CalculatePrice(Coins) {
+      return CoinValue * Coins;
+    }
+
+
+    MetaMask.addEventListener("click", function() {
+      PaymentMethod = "MetaMask";
+      Purchase({Method: PaymentMethod});
+    })
+
+
+    function Purchase(Method) {
+      //$(".Form").style.display = "block";
+
+      switch( Method ) {
+        case "MetaMask":
+          window.addEventListener('load', async () => {
+          if (window.ethereum) {
+            window.web3 = new Web3(ethereum);
+          
+            try {
+              await ethereum.enable();
+              initPayButton()
+            } catch (err) {
+              $('.Form #Buy-PaymentStatus').html('User denied account access', err)
+            }
+          } else if (window.web3) {
+              window.web3 = new Web3(web3.currentProvider)
+              initPayButton()
+          } else {
+              $('.Form #Buy-PaymentStatus').html('No Metamask (or other Web3 Provider) installed')
+          }
+        })
+
+        const initPayButton = () => {
+          $('.Form .BuyWalletCoins').click(() => {
+            const paymentAddress = '0x195e00D3D3367270c24CbaD7e9a52fd78211aB62'
+            const amountEth = CalculatePrice({Coins: Amount.value});
+
+
+            web3.eth.sendTransaction({
+              to: paymentAddress,
+              value: web3.toWei(amountEth, 'ether')
+            }, 
+            (err, transactionId) => {
+              if  (err) {
+                console.log('Payment failed', err)
+                $('.Form #Buy-PaymentStatus').html('Payment failed')
+              } else {
+                $('.Form #Buy-PaymentStatus').html('Payment successful')
+
+
+                fetch("http://127.0.0.1:5000/buy", {
+                  method: "POST",
+                  headers: {"Content-Type": "application/json"},
+                  body: JSON.stringify({
+                    amount: Amount.value
+                  })
+                });
+              }
+            })
+          })
+        }
+      }
+    }
+  </script>
+</div>
+
+
+<div style="padding-bottom: 200px;"></div>
+
+{% endblock %}

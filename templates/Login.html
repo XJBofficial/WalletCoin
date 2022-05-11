@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="../static/style.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+    <title>WalletCoin - Login</title>
+  </head>
+
+
+  <body class="Background">
+    <header>
+      <div class="FrameUP">
+        <a class="FrameButton" href="register"><strong>Register</strong></a>
+        <a class="FrameButton" href="login"><strong>Sign In</strong></a>
+      </div>
+    </header>
+
+
+    <div class="Form">
+      <h1 class="ClassicTitle">SIGN IN</h1>
+      <br>
+
+        <form method="POST" action="">
+          <input class="Input" type="text" id="inputUsername" name="username" placeholder="Username" required="required" autofocus="autofocus" value={{request.form.username}}>
+          <input class="Input" type="password" id="inputPassword" name="password" placeholder="Password" required="required" autofocus="autofocus" value={{request.form.password}}>
+          <br>
+
+          <div id="RegisterLoginNotification">
+            {% for message in get_flashed_messages() %}
+              <h3 class="Notification">{{ message }}</h3>
+            {% endfor %}
+
+            <button class="LoginButton" type="submit">
+              <strong>Sign In</strong>
+            </button>
+
+            <a id="DontHaveAccountUrl" href="register">
+              <strong>Don't have an account? Register now.</strong>
+            </a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+    
+
+    <div style="padding-bottom: 200px;"></div>
+    <div class="CopyRight">
+      <div id="WalletCoinTitle">
+          <h2 id="WalletCoinTitleText">WalletCoin</h2>
+      </div>
+      <div id="Sources">
+          <br>
+
+          <table class="SourcesTable">
+              <tr class="Sources-Sources">
+                  <th class="SourcesTitle">Sources</th>
+                  <th class="SourcesTitle">About</th>
+                  <th class="SourcesTitle">Community</th>
+              </tr>
+
+              <tr class="Sources-Line-0">
+                  <td class="SourcesItem">
+                      <a class="SourceText" href="RESTfulApi">Rest Api</a>
+                  </td>
+                  <td class="SourcesItem">
+                      <a class="SourceText" href="About">About</a>
+                  </td>
+                  <td class="SourcesItem">
+                      <a class="SourceText"
+                          href="https://www.youtube.com/channel/UC2tFLggEqPZw3w83dGvPteQ">Youtube</a>
+                  </td>
+              </tr>
+
+              <tr class="Sources-Line-1">
+                  <td class="SourcesItem"></td>
+                  <td class="SourcesItem">
+                      <a class="SourceText" href="FAQ">FAQ</a>
+                  </td>
+                  <td class="SourcesItem">
+                      <a class="SourceText">Discord</a>
+                  </td>
+              </tr>
+
+              <tr class="Sources-Line-2">
+                <td></td>
+                <td class="SourcesItem">
+                    <a class="SourceText" href="helpCenter">Help Center</a>
+                </td>
+                  <td class="SourcesItem">
+                      <a class="SourceText">Instagram</a>
+                  </td>
+              </tr>
+          </table>
+          <br><br>
+      </div>
+
+      <div id="CopyRightTitle">
+          <span id="CopyRightTitleText">
+              <strong>Copyright © WalletCoin 2021</strong>
+          </span>
+      </div>
+  </div>
+
+  </body>
+</html>

@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<head>
+  <link href="../static/style.css" rel="stylesheet">
+  <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+
+<div class="Form">
+  <h1 class="ClassicTitle">Send WalletCoins</h1>
+  <div style="padding-bottom: 20px;"></div>
+
+  <p class="ClassicText">
+    <strong>Your balance: {{ Balance }} WLLC</strong>
+  </p>
+
+  <form method="POST" action="">
+    <input class="Input" type="text" name="wallet" placeholder="Wallet" required="required" autofocus="autofocus" value="{{ request.form.wallet }}">
+    <input class="Input" type="text" id="amount" name="amount" placeholder="Amount" required="required" autofocus="autofocus" value="{{ request.form.amount }}">
+    <div style="padding-bottom: 20px;"></div>
+
+    {% for message in get_flashed_messages() %}
+    <span id="Notification">
+      <strong>{{ message }}</strong>
+    </span>
+    {% endfor %}
+
+    <div style="padding-bottom: 100px;"></div>
+    <input class="SendWalletCoins" type="submit" value="Send">
+  </form>
+</div>
+<div style="padding-bottom: 300px;"></div>
+
+
+
+{% endblock %}

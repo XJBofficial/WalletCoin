@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<head>
+    <link href="../static/style.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<div class="Form">
+    <form action="createGame" method="post">
+        <h1 class="ClassicTitle">Create New Game</h1>
+
+        <input class="Input" type="text" required="required" name="gameName" placeholder="Game Name" value="{{ request.form.gameName }}">
+        <input class="Input" type="number" required="required" name="stocksAmount" placeholder="Stocks Amount" value="{{ request.form.stocksAmount }}">
+
+        <p class="PromoteGameNotification">Promote your game by writing the Store your game is in or its Website.</p>
+        <input class="Input" type="text" required="no" name="promotion" placeholder="Game Website or Store ( https://... )" value="{{ request.form.promotion }}">
+
+        <div style="padding-bottom: 20px;"></div>
+        {% for message in get_flashed_messages() %}
+            <span class="Notification">
+                <strong>{{ message }}</strong>
+            </span>
+        {% endfor %}
+        <div style="padding-bottom: 50px;"></div>
+
+        <button id="CreateGameButton" type="submit">Monetize your Game</button>
+    </form>
+</div>
+</div>
+
+{% endblock %}

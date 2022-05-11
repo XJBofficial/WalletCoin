@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="../static/style.css" rel="stylesheet">
+        <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <title>WalletCoin</title>
+    </head>
+
+    <body class="Background">
+        <div class="Index-Icon">
+            <div id="Index-IconDiv">
+                <h1 class="ClassicTitle">Welcome to WalletCoin!</h1>
+
+                <div id="Index-RegisterLoginButtons">
+                    <a class="Button" href="/register">
+                        <strong>Register</strong>
+                    </a>
+                    <a class="Button" href="/login">
+                        <strong>Login</strong>
+                    </a>
+                </div>
+                
+                <h1 class="WhiteTitle">WalletCoin (WLLC) Token</h1>
+                
+                <p class="Index-Text">
+                    WalletCoin is a new investing idea for investing in Games !!!<br><br><br>
+                    <a class="Button" href="/register">
+                        <strong>Get started now</strong>
+                    </a>
+                </p>
+            </div>
+        </div>
+        <div style="padding-bottom: 80px;"></div>
+
+
+        <div class="IndexCurrencyPricePanel" style="border: none;">
+            <div class="Index-CurrencyPricePanel">
+                <div id="IndexCurrencyPricePanel-Icon">
+                    <img src="../static/Icons/Bitcoin.png">
+                </div>
+                
+                <div id="IndexCurrencyPricePanel-Data">
+                    <h2  class="PriceInBitcoin">
+                        <a href="priceChart?Coin=Bitcoin">Price In Bitcoin</a>
+                    </h2>
+                    <h3 class="PriceInBitcoin">{{ PriceInBitcoin }} BTC</h3>
+                </div>
+            </div>
+            
+            <div class="Index-CurrencyPricePanel">
+                <div id="IndexCurrencyPricePanel-Icon">
+                    <img src="../static/Icons/Ethereum.png">
+                </div>
+                
+                <div id="Index-CurrencyPricePanel-Data">
+                    <h2 class="PriceInEthereum">
+                        <a href="priceChart?Coin=Ethereum">Price In Ethereum</a>
+                    </h2>
+                    <h3 class="PriceInEthereum">{{ PriceInEthereum }} ETH</h3>
+                </div>
+            </div>
+
+            <div class="Index-CurrencyPricePanel">
+                <div id="IndexCurrencyPricePanel-Icon">
+                    <img src="../static/Icons/Dogecoin.png">
+                </div>
+                
+                <div id="IndexCurrencyPricePanel-Data">
+                    <h2 class="PriceInDogecoin">
+                        <a href="priceChart?Coin=Dogecoin">Price In Dogecoin</a>
+                    </h2>
+                    <h3 class="PriceInDogecoin">{{ PriceInDogecoin }} DOGE</h3>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="Index-WhatIsWalletCoin">
+            <div id="Index-WhatIsWalletCoin-Text">
+                <div id="Index-WhatIsWalletCoin-TextDiv">
+                    <strong>What is WalletCoin ???</strong>
+                </div>
+                <div id="Index-WhatIsWalletCoin-TextDiv">
+                    WalletCoin is a new Cryptocurrency made by a young developer. The first idea was, WalletCoin to become a simple
+                    Cryptocurrency, but after this idea changed. WalletCoin is a Cryptocurrency for Games... A new investment in
+                    metaverse. So this idea generated the first Stock Market for VideoGames! Now game developers and gamers has
+                    more reasons to use this Cryptocurrency and people has more reasons to make a videogame. At the beggining
+                    ( me, the creator of this currency ), I had a lot of doubtes about the successful of this crypto But... if you dont try,
+                    you will never view results... So welcome to WalletCoin!!!
+                </div>
+            </div>
+
+
+            <div id="Index-WhatIsWalletCoin-Text">
+                <div id="Index-WhatIsWalletCoin-TextDiv">
+                    <strong>How I can start ???</strong>
+                </div>
+                <div id="Index-WhatIsWalletCoin-TextDiv">
+                    Start Now by purchasing your first WalletCoins after completing the registeration progress. If you want, find a game
+                    and buy some stocks using your WalletCoins. Wait until the stock price increased and after that, sell it. In another way
+                    simply wait until Currency's value increased and sell your WalletCoins for some other cryptocurrencies.
+                </div>
+            </div>
+
+            <div id="Index-WhatIsWalletCoin-Buttons">
+                <a class="Button" href="/register"><strong>Get started now</strong></a>
+                <a class="Button" href="/buy"><strong>Buy WalletCoins</strong></a>
+            </div>
+        </div>
+
+
+        <div class="Index-WalletCoinValuePanel">
+            <div class="Tokens">
+                <h3 id="TokensTitle">Tokens</h3>
+                <p id="TokensText">{{ Tokens }} WLLC</p>
+            </div>
+
+            <div class="Market">
+                <h3 id="MarketTitle">Market</h3>
+                <p id="MarketText">{{ Market }} WLLC</p>
+            </div>
+
+            <div class="Bought">
+                <h3 id="BoughtTitle">Tokens Bought</h3>
+                <p id="BoughtText">{{ Bought }} WLLC</p>
+                <p id="BoughtValue">{{ BoughtValue }} EUR</p>
+            </div>
+
+            <div class="Sold">
+                <h3 id="SoldTitle">Tokens Sold</h3>
+                <p id="SoldText">{{ Sold }} WLLC</p>
+                <p id="SoldValue">{{ SoldValue }} EUR</p>
+            </div>
+        </div>
+
+
+        <div class="Index-WhatIsWalletCoin">
+            <div id="Index-WhatIsWalletCoin-Text">
+                <div id="Index-WhatIsWalletCoin-TextDiv">
+                    <strong>Why WalletCoin for my game ???</strong>
+                </div>
+                <div id="Index-WhatIsWalletCoin-TextDiv">
+                    WalletCoin is a token that helps game developers, companies and some new people in game development experience
+                    to monetize their games and earn some cryptocurrencies ( like Bitcoins, Ethereums, Dogecoins etc. ). You can make
+                    money easy from your game by embed it in WalletCoin's Games Stock Market. People release some stocks for their
+                    games and players investing on it ( like real Stock Market with companies ), they earn WalletCoins by selling stocks.
+                    At the finish you can sell this WalletCoins for some other cryptocurrencies.
+                </div>
+            </div>
+        </div>
+
+
+        <div style="padding-bottom: 80px;"></div>
+        <div class="CopyRight">
+            <div id="WalletCoinTitle">
+                <h2 id="WalletCoinTitleText">WalletCoin</h2>
+            </div>
+            <div id="Sources">
+                <br>
+        
+                <table class="SourcesTable">
+                    <tr class="Sources-Sources">
+                        <th class="SourcesTitle">Sources</th>
+                        <th class="SourcesTitle">About</th>
+                        <th class="SourcesTitle">Community</th>
+                    </tr>
+        
+                    <tr class="Sources-Line-0">
+                        <td class="SourcesItem">
+                            <a class="SourceText" href="RESTfulApi">Rest Api</a>
+                        </td>
+                        <td class="SourcesItem">
+                            <a class="SourceText" href="About">About</a>
+                        </td>
+                        <td class="SourcesItem">
+                            <a class="SourceText"
+                                href="https://www.youtube.com/channel/UC2tFLggEqPZw3w83dGvPteQ">Youtube</a>
+                        </td>
+                    </tr>
+        
+                    <tr class="Sources-Line-1">
+                        <td class="SourcesItem"></td>
+                        <td class="SourcesItem">
+                            <a class="SourceText" href="FAQ">FAQ</a>
+                        </td>
+                        <td class="SourcesItem">
+                            <a class="SourceText">Discord</a>
+                        </td>
+                    </tr>
+        
+                    <tr class="Sources-Line-2">
+                        <td></td>
+                        <td class="SourcesItem">
+                            <a class="SourceText" href="helpCenter">Help Center</a>
+                        </td>
+                        <td class="SourcesItem">
+                            <a class="SourceText">Instagram</a>
+                        </td>
+                    </tr>
+                </table>
+                <br><br>
+            </div>
+        
+            <div id="CopyRightTitle">
+                <span id="CopyRightTitleText">
+                    <strong>Copyright © WalletCoin 2021</strong>
+                </span>
+            </div>
+        </div>
+    </body>
+</html>
