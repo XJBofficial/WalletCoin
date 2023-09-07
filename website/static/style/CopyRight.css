@@ -1,0 +1,78 @@
+.Community {
+    display: inline-flex;
+    width: 100%;
+    height: 200px;
+}
+
+.CommunityChannels {
+    margin-right: auto;
+    margin-left: auto;
+    display: flex;
+    width: fit-content;
+}
+
+.Community-Channel {
+    padding-right: 150px;
+    padding-left: 150px;
+}
+
+#Community-Channel img {
+    width: 100px;
+}
+
+#CommunityName {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #21232d;
+    font-size: 23px;
+    text-align: center;
+}
+
+.CopyRight {
+    margin-top: 100px;
+    margin-left: -10px;
+    margin-bottom: auto;
+    width: 1905px;
+    height: 100%;
+}
+
+.SourcesTable {
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.Sources {
+    background-color: transparent;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.Sources-Item {
+    padding-right: 100px;
+    padding-left: 100px;
+}
+
+.Sources-Header-Title {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #273036;
+    font-size: 30px;
+    text-align: center;
+    padding-right: 100px;
+    padding-left: 100px;
+}
+
+.Sources-Item-Text {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #273036;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+#CopyRightTitle{
+    padding-top: 20px;
+}
+
+#CopyRightTitleText{
+    font-family: Arial, Helvetica, sans-serif;
+    color: #273036;
+    margin-left: 10px;
+}

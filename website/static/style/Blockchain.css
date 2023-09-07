@@ -1,0 +1,153 @@
+#Balance {
+    display: grid;
+}
+
+#Balance-EUR {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #383838;
+    font-size: 30px;
+    font-weight: bold;
+    margin-top: 50px;
+}
+
+#Balance-WLLC {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+#WalletAddressBlock {
+    margin-top: 30px;
+}
+
+#WalletAddress {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+    font-size: 18px;
+}
+
+.Blockchain-Search {
+    margin-left: 1500px;
+    padding-bottom: 10px;
+    display: flex;
+}
+
+#Blockchain-Search {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #ededed;
+    color: #2d2d2d;
+    font-weight: bold;
+    font-size: 15px;
+    border: #afafaf 1px solid;
+    border-radius: 10px;
+    padding: 10px;
+    width: 300px;
+}
+
+#Blockchain-Search-Button {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    font-weight: bold;
+    color: aliceblue;
+    border: none;
+    border-radius: 10px;
+    padding: 11.5px;
+}
+
+#Blockchain-Search-Button:hover {
+    background-color: #919191;
+}
+
+#Blockchain-Search-Notification {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #f34040;
+    font-weight: bold;
+    margin-left: 1500px;
+    display: none;
+}
+
+.BlockchainTable {
+    margin-top: 30px;
+    width: 100%;
+}
+
+.BlockchainHead {
+    background-color: #748585;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #24252e;
+    font-size: 20px;
+    border-radius: 10px;
+}
+
+.Blockchain-Line {
+    margin-top: 30px;
+    display: flex
+}
+
+#Blockchain-Line-Text {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #606565;
+    font-weight: bold;
+}
+
+#Blockchain-Line {
+    background-color: #888b8b;
+    width: 95%;
+}
+
+.Block {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #808f8f;
+    text-align: center;
+}
+
+.BlockData {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    font-size: 20px;
+    padding-top: 40px;
+}
+
+.BlockNumber {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 30px;
+    color: #464646;
+}
+
+
+.BlockContainerTable {
+    margin-top: 50px;
+    width: 100%;
+}
+
+.BlockContainerHead {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #839494;
+    color: #24252e;
+    font-size: 20px;
+}
+
+.BlockContainerBody #BlockContainerBodyTR {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #808f8f;
+    text-align: center;
+}
+
+.SendWalletCoins {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.SendWalletCoins:hover {
+    background-color: #839494;
+}

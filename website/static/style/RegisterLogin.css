@@ -1,0 +1,51 @@
+#LoginAccountUrl {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    color: #748585;
+    text-decoration: none;
+    padding-top: 20px;
+    text-align: center;
+}
+
+#DontHaveAccountUrl {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    color: #748585;
+    text-decoration: none;
+    padding-top: 20px;
+    text-align: center;
+}
+
+.RegisterButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.RegisterButton:hover {
+    background-color: #839494;
+}
+
+.LoginButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.LoginButton:hover {
+    background-color: #839494;
+}

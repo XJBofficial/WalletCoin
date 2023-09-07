@@ -1,1 +1,323 @@
+.Background {
+    background: linear-gradient(89deg, #c3dfdf, transparent);
+    box-sizing: border-box;
+    overflow-x: hidden;
+    padding-top: 100px;
+}
 
+.GlassificBackground {
+    background: linear-gradient(
+    to top right,
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0.3)
+  );
+  border-radius: 20px;
+}
+
+.ClassicTitle{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 40px;
+    text-align: center;
+    color: #748585;
+}
+
+.BlackTitle {
+	font-family: Arial, Helvetica, sans-serif;
+    font-size: 35px;
+    text-align: center;
+    color: #454545;
+}
+
+.ClassicText {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 24px;
+    color: #24252e;
+}
+
+.Source {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #454545;
+	font-size: 17px;
+}
+
+.Notification {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    color: #15191a;
+    text-align: center;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.FormInputTitle {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #9f9f9f;
+	font-size: 20px;
+	margin-top: 35px;
+}
+
+.WhiteTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    color: whitesmoke;;
+}
+
+.Button {
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgb(71, 71, 71);
+    font-size: 20px;
+    border: #748585 1px solid;
+    border-radius: 20px;
+    padding: 14px 25px;
+    text-decoration: none;
+}
+
+.CancelButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: transparent;
+    border: #24252e 1px solid;
+    color: #444444;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.CancelButton:hover {
+    background-color: #e4e4e4;
+}
+
+
+/* The Paginator elements */
+
+.Paginator {
+    margin-left: 725px;
+}
+
+.PageTextPaginator {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+}
+
+.PaginationButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: whitesmoke;
+    text-decoration: none;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+}
+
+
+/* Walletcoin's site table design */
+
+.TableItem {
+    background-color: white;
+    margin-bottom: 3px;
+    border-radius: 6px;
+}
+
+.TableItem ul {
+    display: flex;
+}
+
+.TableItem li {
+    padding-right: 130px;
+    list-style-type: none;
+}
+
+
+/* Input and Form elements */
+
+.Input {
+    background-color: transparent;
+    width: 525px;
+    line-height: 21px;
+    padding: 16px 16px;
+    font-size: 16px;
+    box-sizing: border-box;
+    border: lightgrey 1px solid;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.Form {
+    background: linear-gradient(
+    to top right,
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0.3)
+    );
+    box-shadow: #839494 0px 0px 2px;
+    border-radius: 5px;
+    margin-left: 650px;
+    padding: 40px;
+    width: 530px;
+}
+
+.ClassicTable {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: whitesmoke;
+    text-align: center;
+    border: #b3b3b3 1px solid;
+    border-radius: 5px;
+    justify-content: center;
+}
+
+.ClassicTableItem {
+    font-size: 20px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+
+/* ------------------------------------------------- Header ------------------------------------------------- */
+
+.Header {
+    background-color: #17181e;
+    padding-bottom: 27px;
+    margin-top: -10px;
+    margin-left: -10px;
+    position: fixed;
+    top: 10px;
+    height: 30px;
+    width: 1927px;
+    display: inline-flex;
+}
+
+.Header-Icon {
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+#Header-Icon img {
+    width: 40px;
+}
+
+.Header-Button {
+    margin-top: 20px;
+}
+
+#Header-Button {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #17181e;
+    color: whitesmoke;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 20px;
+    padding-right: 50px;
+    padding-left: 50px;
+}
+
+#Header-Button:hover {
+    background-color: #24252e;
+}
+
+.Header-Menu:hover #Header-Menu {
+    background-color: #17181e;
+    margin-top: 19px;
+    position: absolute;
+    display: grid;
+    width: 145px;
+}
+
+.Header-Menu {
+    margin-top: 20px;
+}
+
+#Header-Menu {
+    display: none;
+}
+
+.Header-Menu-Button {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    padding: 20px;
+}
+
+.Header-Menu-Button:hover {
+    background-color: #24252e;
+}
+
+.ProfileIcon {
+    margin-top: 7px;
+    margin-left: 1081px;
+}
+
+#ProfileIcon img {
+    width: 45px;
+}
+
+#ProfileIcon:hover .Profile-Buttons {
+    background-color: #17181e;
+    margin-left: -70px;
+    display: grid;
+    width: 183px;
+}
+
+.Profile-Buttons {
+    display: none;
+}
+
+.Profile-Button {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    padding: 20px;
+}
+
+.Profile-Button:hover {
+    background-color: #24252e;
+}
+
+
+/* ----------------------------------------------- APIs Menu ----------------------------------------------- */
+
+.APIsMenu {
+    background-color: #ffffff;
+    position: fixed;
+    top: 57px;
+    left: 0;
+    width: 300px;
+    height: 100%;
+}
+
+#APIsMenu-Title {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    color: #748585;
+}
+
+.APIsMenu-Item {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    border-radius: 10px;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    display: flex;
+}
+
+.APIsMenu-Item:hover {
+    background-color: #9eb6bb;
+}
+
+.APIsMenu-Item a {
+    color: rgb(78, 78, 78);
+    text-decoration: none;
+    margin-top: 6px;
+    margin-left: 10px;
+    width: 100%;
+    height: 100%;
+}

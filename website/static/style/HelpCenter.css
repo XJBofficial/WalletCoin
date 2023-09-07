@@ -1,0 +1,38 @@
+#HelpCenter-Form .ClassicText {
+    font-size: 16px;
+    padding-bottom: 20px;
+}
+
+#HelpCenter-Form .HelpCenter-InputField {
+    margin-top: 10px;
+    padding-bottom: 20px;
+}
+
+.HelpCenter-Email {
+    background-color: #ededed;
+    width: 525px;
+    line-height: 21px;
+    padding: 16px 16px;
+    font-size: 16px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: none;
+    margin-top: 10px;
+}
+
+.ReportProblemButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.ReportProblemButton:hover {
+    background-color: #839494;
+}

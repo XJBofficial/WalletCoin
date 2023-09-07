@@ -1,0 +1,32 @@
+.Privacy {
+    margin-right: auto;
+    margin-left: auto;
+    width: 1300px;
+}
+
+.Privacy-Info {
+    margin-top: 50px;
+    margin-left: auto;
+}
+
+.Privacy-SubInfo {
+    margin-top: 50px;
+    margin-left: auto;
+    width: 1270px;
+}
+
+.Privacy-Info-Title {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+}
+
+.Privacy-Info-SubTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #8d9999;
+}
+
+.Privacy-Info-Text {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    color: #748585;
+}

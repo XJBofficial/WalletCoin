@@ -1,0 +1,93 @@
+.MyWallets {
+    margin-right: auto;
+    margin-left: auto;
+    width: 850px;
+    height: 660px;
+    overflow-y: auto;
+}
+
+.Wallet {
+    background-color: white;
+    box-shadow: #bbbbbb 1px 2px 2px;
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-right: auto;
+    margin-left: auto;
+    padding: 20px;
+    width: 700px;
+}
+
+.Wallet-Title {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    color: dimgrey;
+    text-decoration: none;
+}
+
+.ConnectWallet-SubmitButton, .CreateWallet-SubmitButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 525px;
+}
+
+.ConnectWallet-SubmitButton:hover, .CreateWallet-SubmitButton:hover {
+    background-color: #839494;
+}
+
+.NewWallet-Credentials {
+    margin-right: auto;
+    margin-left: auto;
+    display: grid;
+    width: fit-content;
+}
+
+.NewWallet-Buttons {
+    margin-right: auto;
+    margin-left: auto;
+    display: grid;
+    width: 525px;
+}
+
+.NewWallet-ContinueButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 25px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    text-decoration: none;
+    text-align: center;
+}
+
+.NewWallet-ContinueButton:hover {
+    background-color: #839494;
+}
+
+.WalletSettings-Data {
+    margin-top: 50px;
+    margin-right: auto;
+    margin-left: auto;
+    display: grid;
+    width: fit-content;
+}
+
+.WalletSettings-Data .ClassicText {
+    padding-top: 30px;
+    width: 500px
+}
+
+.WalletSettings-Data-Text {
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgb(65, 65, 65);
+    padding-top: 30px;
+}

@@ -1,0 +1,157 @@
+.REST-API-Page {
+    margin-left: 340px;
+    width: 1560px;
+}
+
+.REST-API-Topic {
+    display: flex;
+}
+
+.REST-API-Request {
+    width: 952px;
+}
+
+.REST-API-Response {
+    background-color: #13181e;
+    margin-left: 10px;
+    padding-bottom: 3px;
+    width: 600px;
+}
+
+#REST-API-GetPriceChart .RequestJSON {
+    height: 140px;
+}
+
+#REST-API-ConnectWallet .RequestJSON {
+    height: 120px;
+}
+
+#REST-API-Transaction .RequestJSON {
+    height: 143px;
+}
+
+#REST-API-Withdraw .RequestJSON {
+    height: 140px;
+}
+
+#REST-API-Deposit .RequestJSON {
+    height: 140px;
+}
+
+
+#PriceChartResponse-Stats {
+    margin-left: 10px;
+}
+
+
+.Request-Description {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #24252e;
+    font-size: 18px;
+    padding-bottom: 30px;
+    width: 600px;
+}
+
+
+/* The Request description elements */
+
+.RequestFunction-Title {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 25px;
+    color: #323232;
+}
+
+.Request-URLs {
+    font-family: Arial, Helvetica, sans-serif;
+    display: grid;
+}
+
+.Request-Method-Title, .Request-URL-Title {
+    font-size: 18px;
+    color: #323232;
+}
+
+.Request-URL-Title {
+    margin-top: 10px;
+}
+
+.Request-Method {
+    color: #839494;
+    border: #839494 1px solid;
+    border-radius: 5px;
+    margin-top: 5px;
+    padding: 2.5px;
+    width: 45px;
+}
+
+.Request-URL {
+    color: #748585;
+    margin-top: 5px;
+}
+
+.Request-Arguments {
+    margin-top: 30px;
+}
+
+.Request-Arguments-Title {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #323232;
+}
+
+.Request-Argument {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    font-weight: bold;
+    color: #748585;
+}
+
+.RequestJSON {
+    background-color: #13181e;
+    font-family: revert;
+    color: #dbdbdb;
+    font-size: 17px;
+    border: #c9c9c9 1px solid;
+    border-radius: 5px;
+    overflow-y: hidden;
+    resize: none;
+    margin-top: 10px;
+    width: 600px;
+    height: 150px;
+}
+
+
+/* The Request-Response elements */
+
+.RequestTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #0e1116;
+    color: #bbbbbb; 
+    font-size: 22px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}
+
+.RequestUrl {
+    font-family: revert;
+    color: rgb(177, 151, 6);
+    font-size: 15px;
+    padding-left: 10px;
+}
+
+.ExampleResponseTitle {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #0e1116;
+    color: #bbbbbb;
+    font-size: 22px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}
+
+.ResultText {
+    font-family: revert;
+    color: rgb(206, 205, 205);
+    font-size: 15px;
+    padding-left: 10px;
+}

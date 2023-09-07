@@ -1,0 +1,185 @@
+.GlassificBackground {
+    margin-right: auto;
+    margin-left: auto;
+    width: fit-content;
+}
+
+#Chart {
+    border: #839494 1px solid;
+    border-radius: 5px;
+    margin-left: 30px;
+    width: 900px;
+    height: 500px;
+    display: block;
+}
+
+.ValueChartTimes {
+    margin-left: 150px;
+}
+
+#ValueChartTimes {
+    display: inline-flex;
+}
+
+#ValueChartToday {
+    margin-left: 418px;
+}
+
+#ValueChartToday, #ValueChartThisWeek, #ValueChartThisMonth, #ValueChartThisYear {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    background-color: transparent;
+    color: #839494;
+    padding: 10px 20px 10px 20px;
+    border: #748585 1px solid;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+#ValueChartToday:hover, #ValueChartThisWeek:hover, #ValueChartThisMonth:hover, #ValueChartThisYear:hover {
+    background-color: white;
+}
+
+#ValueChartTimeButton {
+    margin-left: 3px;
+    margin-bottom: -6px;
+    list-style-type: none;
+}
+
+
+.PriceChartBackground {
+    background: linear-gradient(89deg, #c3dfdf, transparent);
+    box-sizing: border-box;
+}
+
+.PriceChartBackground .GlassificBackground {
+    margin-top: 80px;
+    margin-right: auto;
+    margin-left: auto;
+    padding-top: 10px;
+    height: 1000px;
+    width: 1430px;
+}
+
+.StatisticsWall {
+    margin-left: 30px;
+}
+
+.FrameUP-PriceChart {
+    background-color: #17181e;
+    padding-bottom: 27px;
+    margin-top: -10px;
+    margin-left: -110px;
+    display: inline-flex;
+    height: 30px;
+    width: 1902px;
+}
+
+.FrameUP-PriceChart .FrameUP {
+    margin-top: 0px;
+}
+
+.CopyRight-PriceChart {
+    box-sizing: border-box;
+    margin-bottom: auto;
+    margin-left: -110px;
+    width: 1902px;
+}
+
+
+.Price-Changing #Price-Changing-Icon {
+    width: 20px;
+    height: 18px;
+}
+
+.Price-Changing #Price-Increased {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #31d476;
+}
+
+.Price-Changing #Price-Decreased {
+    font-family: Arial, Helvetica, sans-serif;
+    color: red;
+}
+
+.WalletCoinPrice {
+    margin-top: 30px;
+    margin-left: 30px;
+    display: inline-flex;
+}
+
+.WalletCoinPrice .WalletCoinPrice-Value {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    color: #13181e;
+}
+
+.WalletCoinPrice #WalletCoinPrice-Value {
+    margin-top: -14px;
+    margin-left: 20px;
+}
+
+.StatisticsWall {
+    border: #839494 1px solid;
+    border-radius: 4px;
+	margin-top: 10px;
+    display: flow-root;
+    width: 900px;
+    height: 160px;
+}
+
+.StatisticsWall .StatisticsWall-Line {
+    padding-bottom: 10px;
+    display: flex;
+}
+
+.StatisticsWall .StatisticsWall-Item {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    margin-left: 68px;
+    display: grid;
+    width: 200px;
+}
+
+.TradingPanel {
+    border: #839494 1px solid;
+    border-radius: 5px;
+    margin-top: -673px;
+    margin-left: 943px;
+    width: 450px;
+    height: 670px;
+}
+
+.TradingPanel-Title {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #444444;
+    margin-left: 30px;
+}
+
+#TradingPanel-Text {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #839494;
+    font-size: 25px;
+    margin-left: 30px;
+    height: 506px;
+}
+
+.TradingPanel .BuyButton {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #748585;
+    color: aliceblue;
+    border-radius: 5px;
+    border: none;
+    margin-left: 60px;
+    padding: 20px 150px;
+    text-decoration: none;
+}
+
+.TradingPanel .BuyButton:hover {
+    background-color: #839494;
+}
+
+.TradingPanel .TradingPanelText {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #21232b;
+}

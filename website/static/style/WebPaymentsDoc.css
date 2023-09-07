@@ -1,0 +1,79 @@
+.WebPayments {
+    margin-left: auto;
+    width: 1600px
+}
+
+.WebPayments-Info {
+    margin-top: 50px;
+    margin-right: auto;
+    margin-left: auto;
+    width: 1100px;
+}
+
+.WebPayments-Title {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #748585;
+}
+
+.WebPayments-Text {
+    margin-bottom: 50px
+}
+
+#WebPayments-Text {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #24252e;
+    font-size: 18px;
+}
+
+.WebPayments-Request, .WebPayments-Response {
+    margin-bottom: 40px;
+    display: grid;
+}
+
+.WebPayments-Label {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #13181e;
+    color: rgb(177, 151, 6);
+    font-size: 20px;
+    font-weight: bold;
+    overflow-y: hidden;
+    resize: none;
+    margin-right: auto;
+    margin-left: auto;
+    padding: 10px;
+    width: 1000px;
+}
+
+.WebPayments-Code {
+    font-family: revert;
+    background-color: #13181e;
+    font-size: 15px;
+    font-weight: bold;
+    color: #c1c1c1;
+    border: none;
+    overflow-y: hidden;
+    resize: none;
+    margin-right: auto;
+    margin-left: auto;
+    width: 1017px;
+}
+
+.WebPayments-Code:active {
+    border: none;
+}
+
+#WebPayments-CreatePayment-Body {
+    height: 180px;
+}
+
+#WebPayments-GetPayment-Body {
+    height: 73px;
+}
+
+#WebPayments-CreatePayment-Response {
+    height: 110px;
+}
+
+#WebPayments-GetPayment-Response {
+    height: 216px;
+}
