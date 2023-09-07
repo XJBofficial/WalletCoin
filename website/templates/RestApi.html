@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="../static/style/Style.css" rel="stylesheet">
+        <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+        <link href="../static/style/CopyRight.css" rel="stylesheet">
+        <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/CopyRight.css') }}">
+        <link href="../static/style/REST-API.css" rel="stylesheet">
+        <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/REST-API.css') }}">
+        <title>WalletCoin REST API</title>
+    </head>
+
+
+    <body class="Background">
+        <header class="Header">
+            <div class="Header-Icon">
+                <a id="Header-Icon" href="/">
+                    <img src="../static/Icons/WalletCoinLogo.png">
+                </a>
+            </div>
+    
+            <div class="Header-Button">
+                <a id="Header-Button" href="/blockchain">Blockchain</a>
+            </div>
+    
+            <div class="Header-Button">
+                <a id="Header-Button" href="/transaction">Transaction</a>
+            </div>
+    
+            <div class="Header-Menu">
+                <a id="Header-Button">Trading</a>
+    
+                <div id="Header-Menu" style="width: 158px;">
+                    <a class="Header-Menu-Button" href="/buy">Buy</a>
+                    <a class="Header-Menu-Button" href="/sell">Sell</a>
+                </div>
+            </div>
+    
+            <div class="Header-Menu">
+                <a id="Header-Button">Wallet</a>
+    
+                <div id="Header-Menu">
+                    <a class="Header-Menu-Button" href="/wallet/create">Create</a>
+                    <a class="Header-Menu-Button" href="/wallet/connect">Connect</a>
+    
+                    {% if "Address" in Session %}
+                        <a class="Header-Menu-Button" href="/wallet/settings">Settings</a>
+                    {% endif %}
+                </div>
+            </div>
+            
+
+            {% if "Address" in Session %}
+                <div class="ProfileIcon">
+                    <div id="ProfileIcon">
+                        <img src="../static/Icons/ProfileIcon.png">
+
+                        <div class="Profile-Buttons">
+                            <a class="Profile-Button" href="/api/keys">API</a>
+                            <a class="Profile-Button" href="/logout">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </header>
+  
+
+        <div class="APIsMenuContainer">
+            <div class="APIsMenu">
+                <div class="APIsMenu-Title">
+                    <h1 id="APIsMenu-Title">WalletCoin API</h1>
+                </div>
+                
+                <div class="APIsMenu-Item">
+                    <img src="{{ url_for('static', filename='Icons/Shop.png') }}" width="30px" height="30px">
+                    <a href="/api/webPayments">Web Payments</a>
+                </div>
+
+                <div class="APIsMenu-Item">
+                    <img src="{{ url_for('static', filename='Icons/RestApi.png') }}" width="30px" height="30px">
+                    <a href="/api/rest">REST API</a>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="REST-API">
+            <h1 class="ClassicTitle">WalletCoin REST API</h1>
+            <p class="ClassicText">
+                This is the REST API of WalletCoin. Use this API to integrate WalletCoin<br>
+                into your apps
+            </p>
+
+
+            <div class="REST-API-Page">
+                <div class="REST-API-Topic" id="REST-API-GetPrice">
+                    <div class="REST-API-Request">
+                        <h2 class="RequestFunction-Title">Get the price of WalletCoin:</h2>
+                        
+                        <div class="Request-Description">
+                            Use this method to get the price of WalletCoin.<br>
+                        </div>
+
+                        
+                        <div class="Request-URLs">
+                            <strong class="Request-Method-Title">Method: </strong>
+                            <strong class="Request-Method">GET</strong>
+                            <strong class="Request-URL-Title">Request Url:</strong>
+                            <strong class="Request-URL">https://walletcoincrypto.com/api/price</strong>
+                        </div>
+                    </div>
+
+
+                    <div class="REST-API-Response">
+                        <h3 class="RequestTitle">
+                            <strong>Request:</strong>
+                        </h3>
+                        
+                        <h4 class="RequestUrl">
+                            Url: https://walletcoincrypto.com/api/price
+                        </h4>
+
+                        <h3 class="ExampleResponseTitle">
+                            <strong>Example Response:</strong>
+                        </h3>
+                        
+
+                        <pre class="ResultText">
+                            <code class="ResultText">
+{
+    "result": 3.1
+}
+                            </code>
+                        </pre>
+                    </div>
+                </div>
+
+
+                <div class="REST-API-Topic" id="REST-API-GetPriceChart">
+                    <div class="REST-API-Request">
+                        <h2 class="RequestFunction-Title">Get the price chart:</h2>
+                        
+                        <div class="Request-Description">
+                            Use this method to get the price chart of WalletCoin
+                        </div>
+
+                        
+                        <div class="Request-URLs">
+                            <strong class="Request-Method-Title">Method: </strong>
+                            <strong class="Request-Method">GET</strong>
+                            <strong class="Request-URL-Title">Request Url:</strong>
+                            <strong class="Request-URL">https://walletcoincrypto.com/api/price/chart</strong>
+                        </div>
+                        
+
+                        <!-- Day chart data -->
+
+                        <div class="Request-Arguments">
+                            <h2 class="Request-Arguments-Title">Arguments: </h2>
+
+                            <ul id="Request-Arguments">
+                                <li class="Request-Argument">list: hours</li>
+                                <li class="Request-Argument">day: ( A day ) This is optional</li>
+                                <li class="Request-Argument">month: ( A month ) This is optional</li>
+                                <li class="Request-Argument">year: ( A year ) This is optional</li>
+                            </ul>
+                        </div>
+
+
+                        <div class="Request-Description">
+                            Get the chart of a day ( Pass the data to url queries )
+                        </div>
+
+
+                        <!-- Month chart data -->
+
+                        <div class="Request-Arguments">
+                            <h2 class="Request-Arguments-Title">Arguments: </h2>
+
+                            <ul id="Request-Arguments">
+                                <li class="Request-Argument">list: days</li>
+                                <li class="Request-Argument">day: ( A day ) This is optional</li>
+                                <li class="Request-Argument">month: ( A month ) This is optional</li>
+                            </ul>
+                        </div>
+
+
+                        <div class="Request-Description">
+                            Get the chart of a month ( Pass the data to url queries )
+                        </div>
+
+
+                        <!-- Year chart data -->
+
+                        <div class="Request-Arguments">
+                            <h2 class="Request-Arguments-Title">Arguments: </h2>
+
+                            <ul id="Request-Arguments">
+                                <li class="Request-Argument">list: months</li>
+                                <li class="Request-Argument">year: ( A year ) This is optional</li>
+                            </ul>
+                        </div>
+
+
+                        <div class="Request-Description">
+                            Get the chart of a year ( Pass the data to url queries )
+                        </div>
+                    </div>
+
+
+                    <div class="REST-API-Response">
+                        <h3 class="RequestTitle">
+                            <strong>Example Request:</strong>
+                        </h3>
+                        
+                        <pre class="RequestUrl">
+                            <code class="RequestUrl">
+Url: https://.../api/price/chart?list=hours&year=2023&month=9&day=3
+                            </code>
+                        </pre>
+
+                        <h3 class="ExampleResponseTitle">
+                            <strong>Example Response:</strong>
+                        </h3>
+                        
+                        <pre class="ResultText">
+                            <code class="ResultText">
+{
+    "result": {
+        "Time": "Day",
+        "Price": 3.1,
+        "Changed": "Increased",
+        "ChangePercent": 10,
+        "Owned": 200000000000,
+        "ForSell": 800000000000,
+        "Volume": 1902800900,
+        "MarketCap": 10000000000000,
+        "Stats": [
+            {
+                "Tag": "3:55:36",
+                "Value": 1.12
+            },
+            {
+                "Tag": "5:56:11",
+                "Value": 2.125
+            },
+            {
+                "Tag": "7:57:36",
+                "Value": 2.11
+            },
+            {
+                "Tag": "13:58:11",
+                "Value": 3.1
+            }
+        ]
+    }
+}
+                            </code>
+                        </pre>
+                    </div>
+                </div>
+
+
+                <div class="REST-API-Topic" id="REST-API-ConnectWallet">
+                    <div class="REST-API-Request">
+                        <h2 class="RequestFunction-Title">Connect your Wallet:</h2>
+
+                        <div class="Request-Description">
+                            Use this method to connect your wallet. Warning. Use this method
+                            to connect your wallet. Warning. Use this method to connect your
+                            own wallet only. Scam is being prosecuted.
+                        </div>
+
+
+                        <div class="Request-URLs">
+                            <strong class="Request-Method-Title">Method: </strong>
+                            <strong class="Request-Method">POST</strong>
+                            <strong class="Request-URL-Title">Request Url:</strong>
+                            <strong class="Request-URL">https://walletcoincrypto.com/api/wallet/auth</strong>
+                        </div>
+                        
+
+                        <div class="Request-Arguments">
+                            <h2 class="Request-Arguments-Title">Arguments: </h2>
+
+                            <ul id="Request-Arguments">
+                                <li class="Request-Argument">private_key: Your private key</li>
+                                <li class="Request-Argument">secret_phrase: Your secret phrase</li>
+                                <li class="Request-Argument">wallet: Your wallet address</li>
+                                <li class="Request-Argument">api_key: Your API Key</li>
+                            </ul>
+
+                            <div class="Request-Description" style="padding-bottom: 0px;">
+                                "wallet" & "api_key" is used to validate your API credentials.
+                            </div>
+
+                            <textarea class="RequestJSON" readonly>
+{
+"private_key": your_private_key,
+"secret_phrase": your_secret_phrase,
+"wallet": your_wallet,
+"api_key": your_api_key
+}
+                            </textarea>
+                        </div>
+                    </div>
+
+
+                    <div class="REST-API-Response">
+                        <h3 class="RequestTitle">
+                            <strong>Request:</strong>
+                        </h3>
+                        
+                        
+                        <pre class="RequestUrl">
+                            <code class="RequestUrl">
+Url: https://walletcoincrypto.com/api/wallet/auth
+Body: {
+    "private_key": your_private_key,
+    "secret_phrase": your_secret_phrase,
+    "wallet": your_wallet,
+    "api_key": your_api_key
+}
+                            </code>
+                        </pre>
+                        
+
+                        <h3 class="ExampleResponseTitle">
+                            <strong>Example Response:</strong>
+                        </h3>
+                                            
+                        <pre class="ResultText">
+                            <code class="ResultText">
+{
+    "result": {
+        "PublicKey": "zDMlGt3wrIagfTjQoh2NxdHmbB",
+        "PrivateKey": "k8JbgKFrTBGzsyPjqDcAmVQRujh",
+        "SecretPhrase": "Your wallet secret phrase",
+        "API_KEY": "0WGbN3AioCpM8LZj7vuqUs",
+        "Address": "fyPundefinedvBEkv2TeTx3XjWbHekW1U",
+        "Balance": 1829
+    }
+}
+                            </code>
+                        </pre>
+                    </div>
+                </div>
+
+
+                <div class="REST-API-Topic" id="REST-API-Transaction">
+                    <div class="REST-API-Request">
+                        <h2 class="RequestFunction-Title">Use Transaction methods:</h2>
+
+                        <div class="Request-Description">
+                            Use this method to send money to other wallets. You can use this for your project
+                            to payout your clients. Warning. Use this method to send money from your own
+                            wallet only, don't say to clients connect their wallet. Scam is being prosecuted.
+                        </div>
+
+
+                        <div class="Request-URLs">
+                            <strong class="Request-Method-Title">Method: </strong>
+                            <strong class="Request-Method">POST</strong>
+                            <strong class="Request-URL-Title">Request Url:</strong>
+                            <strong class="Request-URL">https://walletcoincrypto.com/api/wallet/transaction</strong>
+                        </div>
+                        
+
+                        <div class="Request-Arguments">
+                            <h2 class="Request-Arguments-Title">Arguments: </h2>
+
+                            <ul id="Request-Arguments">
+                                <li class="Request-Argument">private_key: Your private key</li>
+                                <li class="Request-Argument">recipient: Recipient wallet</li>
+                                <li class="Request-Argument">amount: Amount to send</li>
+                                <li class="Request-Argument">wallet: Your wallet address</li>
+                                <li class="Request-Argument">api_key: Your API Key</li>
+                            </ul>
+
+                            <textarea class="RequestJSON" readonly>
+{
+"private_key": your_private_key,
+"recipient": recipient_wallet,
+"amount": amount_to_send,
+"wallet": your_wallet,
+"api_key": your_api_key
+}
+                            </textarea>
+                        </div>
+                    </div>
+
+
+                    <div class="REST-API-Response">
+                        <h3 class="RequestTitle">
+                        <strong>Request:</strong>
+                        </h3>
+
+
+                        <pre class="RequestUrl">
+                            <code class="RequestUrl">
+Url: https://walletcoincrypto.com/api/wallet/transaction
+Body: {
+    "private_key": your_private_key,
+    "recipient": recipient_wallet,
+    "amount": amount_to_send,
+    "wallet": your_wallet,
+    "api_key": your_api_key
+}
+                            </code>
+                        </pre>
+                        
+
+                        <h3 class="ExampleResponseTitle">
+                            <strong>Example Response:</strong>
+                        </h3>
+                                            
+                        <pre class="ResultText">
+                            <code class="ResultText">
+{
+    "result": {
+        "Amount": 1829 # The remaining balance
+    }
+}
+                            </code>
+                        </pre>
+                    </div>
+                </div>
+
+
+                <div class="REST-API-Topic" id="REST-API-Withdraw">
+                    <div class="REST-API-Request">
+                        <h2 class="RequestFunction-Title">Withdraw method:</h2>
+
+                        <div class="Request-Description">
+                            Use this method to withdraw money from one wallet to other one.
+                        </div>
+
+
+                        <div class="Request-URLs">
+                            <strong class="Request-Method-Title">Method: </strong>
+                            <strong class="Request-Method">POST</strong>
+                            <strong class="Request-URL-Title">Request Url:</strong>
+                            <strong class="Request-URL">https://walletcoincrypto.com/api/wallet/withdraw</strong>
+                        </div>
+                        
+
+                        <div class="Request-Arguments">
+                            <h2 class="Request-Arguments-Title">Arguments: </h2>
+
+                            <ul id="Request-Arguments">
+                                <li class="Request-Argument">private_key: Your private key</li>
+                                <li class="Request-Argument">withdraw_to: The address to send the money to</li>
+                                <li class="Request-Argument">amount: Amount to send</li>
+                                <li class="Request-Argument">wallet: Your wallet address</li>
+                                <li class="Request-Argument">api_key: Your API Key</li>
+                            </ul>
+
+                            <textarea class="RequestJSON" readonly>
+{
+"private_key": your_private_key,
+"withdraw_to": withdraw_address,
+"amount": amount_to_send,
+"wallet": your_wallet,
+"api_key": your_api_key
+}
+                            </textarea>
+                        </div>
+                    </div>
+
+
+                    <div class="REST-API-Response">
+                        <h3 class="RequestTitle">
+                        <strong>Request:</strong>
+                        </h3>
+
+
+                        <pre class="RequestUrl">
+                            <code class="RequestUrl">
+Url: https://walletcoincrypto.com/api/wallet/withdraw
+Body: {
+    "private_key": your_private_key,
+    "withdraw_to": withdraw_address,
+    "amount": amount_to_send,
+    "wallet": your_wallet,
+    "api_key": your_api_key
+}
+                            </code>
+                        </pre>
+                        
+
+                        <h3 class="ExampleResponseTitle">
+                            <strong>Example Response:</strong>
+                        </h3>
+                                            
+                        <pre class="ResultText">
+                            <code class="ResultText">
+{
+    "result": {
+        "Amount": 1829 # The remaining balance
+    }
+}
+                            </code>
+                        </pre>
+                    </div>
+                </div>
+
+
+                <div class="REST-API-Topic" id="REST-API-Deposit">
+                    <div class="REST-API-Request">
+                        <h2 class="RequestFunction-Title">Deposit method:</h2>
+
+                        <div class="Request-Description">
+                            Use this method to deposit money from one wallet to other one.
+                        </div>
+
+
+                        <div class="Request-URLs">
+                            <strong class="Request-Method-Title">Method: </strong>
+                            <strong class="Request-Method">POST</strong>
+                            <strong class="Request-URL-Title">Request Url:</strong>
+                            <strong class="Request-URL">https://walletcoincrypto.com/api/wallet/deposit</strong>
+                        </div>
+                        
+
+                        <div class="Request-Arguments">
+                            <h2 class="Request-Arguments-Title">Arguments: </h2>
+
+                            <ul id="Request-Arguments">
+                                <li class="Request-Argument">private_key: Your private key</li>
+                                <li class="Request-Argument">deposit_to: The address to send the money to</li>
+                                <li class="Request-Argument">amount: Amount to send</li>
+                                <li class="Request-Argument">wallet: Your wallet address</li>
+                                <li class="Request-Argument">api_key: Your API Key</li>
+                            </ul>
+
+                            <textarea class="RequestJSON" readonly>
+{
+"private_key": your_private_key,
+"deposit_to": deposit_address,
+"amount": amount_to_send,
+"wallet": your_wallet,
+"api_key": your_api_key
+}
+                            </textarea>
+                        </div>
+                    </div>
+
+
+                    <div class="REST-API-Response" style="height: 550px">
+                        <h3 class="RequestTitle">
+                        <strong>Request:</strong>
+                        </h3>
+
+
+                        <pre class="RequestUrl">
+                            <code class="RequestUrl">
+Url: https://walletcoincrypto.com/api/wallet/deposit
+Body: {
+    "private_key": your_private_key,
+    "deposit_to": deposit_address,
+    "amount": amount_to_send,
+    "wallet": your_wallet,
+    "api_key": your_api_key
+}
+                            </code>
+                        </pre>
+                        
+
+                        <h3 class="ExampleResponseTitle">
+                            <strong>Example Response:</strong>
+                        </h3>
+                                            
+                        <pre class="ResultText">
+                            <code class="ResultText">
+{
+    "result": {
+        "Amount": 1829 # The remaining balance
+    }
+}
+                            </code>
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

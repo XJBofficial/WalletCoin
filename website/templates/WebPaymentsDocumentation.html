@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="../static/style/Style.css" rel="stylesheet">
+        <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+        <link href="../static/style/WebPaymentsDoc.css" rel="stylesheet">
+        <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/WebPaymentsDoc.css') }}">
+        <title>WalletCoin Web Payments</title>
+    </head>
+
+
+    <body class="Background">
+        <header class="Header">
+            <div class="Header-Icon">
+                <a id="Header-Icon" href="/">
+                    <img src="../static/Icons/WalletCoinLogo.png">
+                </a>
+            </div>
+    
+            <div class="Header-Button">
+                <a id="Header-Button" href="/blockchain">Blockchain</a>
+            </div>
+    
+            <div class="Header-Button">
+                <a id="Header-Button" href="/transaction">Transaction</a>
+            </div>
+    
+            <div class="Header-Menu">
+                <a id="Header-Button">Trading</a>
+    
+                <div id="Header-Menu" style="width: 158px;">
+                    <a class="Header-Menu-Button" href="/buy">Buy</a>
+                    <a class="Header-Menu-Button" href="/sell">Sell</a>
+                </div>
+            </div>
+    
+            <div class="Header-Menu">
+                <a id="Header-Button">Wallet</a>
+    
+                <div id="Header-Menu">
+                    <a class="Header-Menu-Button" href="/wallet/create">Create</a>
+                    <a class="Header-Menu-Button" href="/wallet/connect">Connect</a>
+    
+                    {% if "Address" in Session %}
+                        <a class="Header-Menu-Button" href="/wallet/settings">Settings</a>
+                    {% endif %}
+                </div>
+            </div>
+            
+
+            {% if "Address" in Session %}
+                <div class="ProfileIcon">
+                    <div id="ProfileIcon">
+                        <img src="../static/Icons/ProfileIcon.png">
+
+                        <div class="Profile-Buttons">
+                            <a class="Profile-Button" href="/api/keys">API</a>
+                            <a class="Profile-Button" href="/logout">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </header>
+
+
+        <div class="APIsMenuContainer">
+            <div class="APIsMenu">
+                <div class="APIsMenu-Title">
+                    <h1 id="APIsMenu-Title">WalletCoin API</h1>
+                </div>
+                
+                <div class="APIsMenu-Item">
+                    <img src="{{ url_for('static', filename='Icons/Shop.png') }}" width="30px" height="30px">
+                    <a href="/api/webPayments">Web Payments</a>
+                </div>
+
+                <div class="APIsMenu-Item">
+                    <img src="{{ url_for('static', filename='Icons/RestApi.png') }}" width="30px" height="30px">
+                    <a href="/api/rest">REST API</a>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="WebPayments">
+            <h1 class="ClassicTitle">Web Payments</h1>
+            <p class="ClassicText">
+                This is the tutorial to accept WalletCoin payments on your website. This API<br>
+                executed by HTTP requests.
+            </p>
+
+
+            <div class="WebPayments-Info">
+                <h2 class="WebPayments-Title">Initialize a new payment.</h2>
+
+                <div class="WebPayments-Text">
+                    <p id="WebPayments-Text">
+                        Once user click the button to complete payment, you need to start a new
+                        payment. You have to call an http request to generate the url for the payment.
+                        Once, you receive this url, you have to redirect the user to this link. Warning:
+                        Redirect your user to this link & don't try to make a payment form on your
+                        app because there is the posibillity to scam your user and steal his credentials.
+                        Scam & phising are procecuded.
+                    </p>
+                </div>
+
+
+                <div class="WebPayments-Request">
+                    <label class="WebPayments-Label">Request url:</label>
+                    <textarea class="WebPayments-Code" id="WebPayments-CreatePayment-Url">
+POST: https://127.0.0.1:5000/api/webPayments
+                    </textarea>
+                </div>
+
+
+                <div class="WebPayments-Request">
+                    <label class="WebPayments-Label">Example Request body:</label>
+                    <textarea class="WebPayments-Code" id="WebPayments-CreatePayment-Body">
+{
+    "description": "Payment description.",
+    "amount": 100,
+    "success_url": "https://example.com/marketplace/success",
+    "failed_url": "https://example.com/marketplace/failed",
+    "cancel_url": "https://example.com/marketplace",
+    "private_key": "k8JbgKFrTBGzsyPjqDcAmVQRujh",
+    "wallet": "fyPundefinedvBEkv2TeTx3XjWbHekW1U",
+    "api_key": "0WGbN3AioCpM8LZj7vuqUs"
+}
+                    </textarea>
+                </div>
+
+
+                <div class="WebPayments-Text">
+                    <p id="WebPayments-Text">
+                        <strong>"description"</strong> argument is the description of new payment. <strong>"amount"</strong> is the amount
+                        of WalletCoins that user need pay. <strong>"success_url"</strong> is the that user redirect to once the
+                        payment is completed successfully. <strong>"failed_url"</strong> is the that user redirect to once the
+                        payment failed to completee. <strong>"cancel_url"</strong> is the that user redirect to once he cancel
+                        the payment. <strong>"private_key"</strong>, <strong>"wallet"</strong> & <strong>"api_key"</strong> is your credentials and it is used for
+                        API validation.
+                    </p>
+                </div>
+
+
+                <div class="WebPayments-Response">
+                    <label class="WebPayments-Label">Example Response body:</label>
+                    <textarea class="WebPayments-Code" id="WebPayments-CreatePayment-Response">
+{
+    "result": {
+        "invoice": "xu36Bi983FtHsd4",
+        "payment_url": "https://127.0.0.1:5000/payments?invoice=xu36Bi983FtHsd4&seller=fyPundefinedvBEkv2TeTx3XjWbHekW1U"
+    }
+}
+                    </textarea>
+                </div>
+            </div>
+
+
+            <div class="WebPayments-Info">
+                <h2 class="WebPayments-Title">Get payment data ( Optionally ).</h2>
+
+                <div class="WebPayments-Text">
+                    <p id="WebPayments-Text">
+                        Once you Initialize a new payment, before you direct your user to the payment
+                        url, you can fetch the data of this payment.
+                    </p>
+                </div>
+
+
+                <div class="WebPayments-Request">
+                    <label class="WebPayments-Label">Request url:</label>
+                    <textarea class="WebPayments-Code" id="WebPayments-GetPayment-Url">
+GET: https://127.0.0.1:5000/api/webPayments
+                    </textarea>
+                </div>
+
+
+                <div class="WebPayments-Request">
+                    <label class="WebPayments-Label">Example Request headers:</label>
+                    <textarea class="WebPayments-Code" id="WebPayments-GetPayment-Body">
+{
+    "invoice": "xu36Bi983FtHsd4",
+    "seller": "fyPundefinedvBEkv2TeTx3XjWbHekW1U"
+}
+                    </textarea>
+                </div>
+
+
+                <div class="WebPayments-Text">
+                    <p id="WebPayments-Text">
+                        <strong>"invoice"</strong> is the invoice id you receive when the payment Initialized. <strong>"seller"</strong> argument
+                        is your wallet address. Because of the acceptable method is <strong>"GET"</strong>, you need to send
+                        the data inside the headers of the request.
+                    </p>
+                </div>
+
+
+                <div class="WebPayments-Response">
+                    <label class="WebPayments-Label">Example Response body:</label>
+                    <textarea class="WebPayments-Code" id="WebPayments-GetPayment-Response">
+{
+    "result": {
+        "Id": "xu36Bi983FtHsd4",
+        "Description": "Payment description.",
+        "Amount": 100,
+        "Urls": {
+            "Success": "https://example.com/marketplace/success",
+            "Failed": "https://example.com/marketplace/failed",
+            "Cancel": "https://example.com/marketplace"
+        }
+    }
+}
+                    </textarea>
+                </div>
+            </div>
+
+
+            <div class="WebPayments-Info">
+                <h2 class="WebPayments-Title">Execute payment.</h2>
+                <div class="WebPayments-Text">
+                    <p id="WebPayments-Text">
+                        Now, the only thing you need is to redirect your client on the payment url
+                        and wait until he pay you. Redirect your user using the program of your app.
+                        For example, if you have made a web app, go to javascript code and write:
+                        window.location.href = payment_url;
+                    </p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

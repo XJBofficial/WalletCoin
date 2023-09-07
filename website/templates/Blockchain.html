@@ -1,0 +1,180 @@
+{% extends 'Layout.html' %}
+
+{% block body %}
+
+<head>
+  <link href="../static/style/Style.css" rel="stylesheet">
+  <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+  <link href="../static/style/Blockchain.css" rel="stylesheet">
+  <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Blockchain.css') }}">
+  <style>
+    .Background {
+      padding-top: 40px;
+    }
+  </style>
+</head>
+
+
+<div id="Balance">
+  <label id="Balance-EUR">{{ Price }} €</label>
+  <label id="Balance-WLLC">{{ Balance }} WLLC</label>
+</div>
+
+
+<div id="WalletAddressBlock">
+  <label id="WalletAddress">Wallet Address: {{ WalletAddress }}</label>
+</div>
+
+
+<div class="Blockchain-Search">
+    <input id="Blockchain-Search" name="Search" type="text" placeholder="Search a Block/Wallet">
+    <button id="Blockchain-Search-Button" onclick="Search();">Search</button>
+</div>
+<label id="Blockchain-Search-Notification">No Blocks Found</label>  
+
+
+<script type="text/javascript">
+  const SearchInput = document.querySelector("#Blockchain-Search");
+  const SearchButton = document.querySelector("#Blockchain-Search-Button");
+  const SearchNotification = document.querySelector("#Blockchain-Search-Notification");
+
+
+  function Search() {
+    if ( SearchInput.value != "" ) {
+      SearchNotification.style.display = "none";
+      let SearchStatus = 0;
+
+      fetch("/blocks/search", {
+        headers: {"content-type": "text/javascript"},
+        method: "POST",
+        body: JSON.stringify({
+          "Block": SearchInput.value
+        })
+      }).then((response) => {
+        SearchStatus = response.status;
+
+        if ( response.status != response.ok ) {
+          switch (response.status) {
+            case 404:
+              SearchNotification.style.display = "block";
+              break;
+            
+            case 500:
+              window.alert("Internal server error.");
+              break;
+          }
+        }
+      }).then((data) => {
+        if ( SearchStatus == 200 ) {
+          window.location.href = "/block?number=" + data.Number;
+        }
+      })
+    }
+  }
+</script>
+
+
+{% if MyBlock %}
+  <div class="Blockchain-Line">
+      <label id="Blockchain-Line-Text">Your Block</label>
+      <hr id="Blockchain-Line">
+  </div>
+
+
+  <table class="BlockchainTable">
+    <thead class="BlockchainHead">
+      <tr class="BlockchainHead-Line">
+        <th class="BlockchainHead-Element">Number</th>
+        <th class="BlockchainHead-Element">Data</th>
+        <th class="BlockchainHead-Element">Hash</th>
+        <th class="BlockchainHead-Element">Previous Hash</th>
+        <th class="BlockchainHead-Element">Date</th>
+        <th class="BlockchainHead-Element">Hour</th>
+      </tr>
+    </thead>
+
+    <tbody class="Blockchain">
+      <tr class="Block">
+        <td class="Block-Element">
+            <strong>{{ MyBlock.Block }}</strong>
+        </td>
+
+        <td class="Block-Element">
+            <strong>{{ MyBlock.Data }}</strong>
+        </td>
+
+        <td class="Block-Element">
+            <a style="color: teal;" href="/block?number={{ MyBlock.Block }}">
+                <strong>{{ MyBlock.Hash }}</strong>
+            </a>
+        </td>
+
+        <td class="Block-Element">
+            <strong>{{ MyBlock.PrevHash }}</strong>
+        </td>
+
+        <td class="Block-Element">
+            <strong>{{ MyBlock.Day }}</strong>
+        </td>
+
+        <td class="Block-Element">
+            <strong>{{ MyBlock.Hour }}</strong>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+{% endif %}
+
+
+<div class="Blockchain-Line">
+    <label id="Blockchain-Line-Text">Last Blocks</label>
+    <hr id="Blockchain-Line">
+</div>
+
+<table class="BlockchainTable">
+  <thead class="BlockchainHead">
+    <tr class="BlockchainHead-Line">
+      <th class="BlockchainHead-Element">Number</th>
+      <th class="BlockchainHead-Element">Data</th>
+      <th class="BlockchainHead-Element">Hash</th>
+      <th class="BlockchainHead-Element">Previous Hash</th>
+      <th class="BlockchainHead-Element">Date</th>
+      <th class="BlockchainHead-Element">Hour</th>
+    </tr>
+  </thead>
+  
+
+  <tbody class="Blockchain">
+    {% for Block in BlocksList %}
+      <tr class="Block">
+        <td class="Block-Element">
+            <strong>{{ Block.Block }}</strong>
+        </td>
+
+        <td class="Block-Element">
+            <strong>{{ Block.Data }}</strong>
+        </td>
+
+        <td class="Block-Element">
+            <a style="color: teal;" href="/block?number={{ Block.Block }}">
+                <strong>{{ Block.Hash }}</strong>
+            </a>
+        </td>
+
+        <td class="Block-Element">
+            <strong>{{ Block.PrevHash }}</strong>
+        </td>
+
+        <td class="Block-Element">
+            <strong>{{ Block.Day }}</strong>
+        </td>
+
+        <td class="Block-Element">
+            <strong>{{ Block.Hour }}</strong>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "Layout.html" %}
+
+{% block body %}
+
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="../static/style/Style.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+    <link href="../static/style/Wallets.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Wallets.css') }}">
+</head>
+
+{% if not Status %}
+    <form class="Form" action="/wallet/create" method="post">
+        <h1 class="ClassicTitle">Create wallet</h1>
+    
+        <input class="Input" name="Phrase" type="text" placeholder="Choose a Secret Phrase" value="">
+        <input class="CreateWallet-SubmitButton" name="Create" type="submit" value="Create">
+    </form>
+{% else %}
+    <div class="NewWallet-Title">
+        <h1 class="ClassicTitle">Your new Wallet</h1>
+        <p class="ClassicText">
+            Please backup your private key and the secret<br>
+            phrase of your wallet. If you lose this credentials<br>
+            you will lose your funds.<br>
+        </p>
+    </div>
+
+    <div class="NewWallet-Credentials">
+        <input class="Input" name="PrivateKey" type="text" value="{{ Priv }}">
+        <input class="Input" name="Phrase" type="text" value="{{ Phrase }}">
+    </div>
+
+    <div class="NewWallet-Buttons">
+        <a class="NewWallet-ContinueButton" href="/wallet/connect">Connect Now</a>
+    </div>
+{% endif %}
+
+
+{% endblock %}

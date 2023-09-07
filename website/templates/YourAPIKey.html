@@ -1,0 +1,32 @@
+{% extends "Layout.html" %}
+
+{% block body %}
+
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="../static/style/Style.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+    <link href="../static/style/Wallets.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Wallets.css') }}">
+</head>
+
+
+<h1 class="ClassicTitle">API Integration</h1>
+
+<div class="WalletSettings-Data">
+    <label class="WalletSettings-Data-Text">Your Api Key:</label>
+    <input class="Input" type="text" value="{{ API_KEY }}" readonly>
+    
+    <p class="ClassicText">
+        This is your API Key. You can use this key to integrate
+        WalletCoin on your app and accept WalletCoin payments.
+    </p>
+</div>
+
+
+{% endblock %}

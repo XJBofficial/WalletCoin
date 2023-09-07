@@ -1,0 +1,29 @@
+{% extends "Layout.html" %}
+
+{% block body %}
+
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="../static/style/Style.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+    <link href="../static/style/Wallets.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Wallets.css') }}">
+</head>
+
+<form class="Form" action="/wallet/connect" method="post">
+    <h1 class="ClassicTitle">Connect wallet</h1>
+
+    <input class="Input" name="PrivateKey" type="password" placeholder="Private Key" value="">
+    <input class="Input" name="Phrase" type="password" placeholder="Secret Phrase" value="">
+
+    <input class="ConnectWallet-SubmitButton" name="Connect" type="submit" value="Connect">
+</form>
+
+<div style="padding-bottom: 107px;"></div>
+
+{% endblock %}

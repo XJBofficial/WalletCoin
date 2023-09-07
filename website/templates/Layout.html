@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="../static/style/Style.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+    <link href="../static/style/CopyRight.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/CopyRight.css') }}">
+    <link href="../static/style/Wallets.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Wallets.css') }}">
+    <title>WalletCoin</title>
+  </head>
+
+  <body class="Background">
+    <header class="Header">
+        <div class="Header-Icon">
+            <a id="Header-Icon" href="/">
+                <img src="../static/Icons/WalletCoinLogo.png">
+            </a>
+        </div>
+
+        <div class="Header-Button">
+            <a id="Header-Button" href="/blockchain">Blockchain</a>
+        </div>
+
+        <div class="Header-Button">
+            <a id="Header-Button" href="/transaction">Transaction</a>
+        </div>
+
+        <div class="Header-Menu">
+            <a id="Header-Button">Trading</a>
+
+            <div id="Header-Menu" style="width: 158px;">
+                <a class="Header-Menu-Button" href="/buy">Buy</a>
+                <a class="Header-Menu-Button" href="/sell">Sell</a>
+            </div>
+        </div>
+
+        <div class="Header-Menu">
+            <a id="Header-Button">Wallet</a>
+
+            <div id="Header-Menu">
+                <a class="Header-Menu-Button" href="/wallet/create">Create</a>
+                <a class="Header-Menu-Button" href="/wallet/connect">Connect</a>
+
+                {% if "Address" in Session %}
+                    <a class="Header-Menu-Button" href="/wallet/settings">Settings</a>
+                {% endif %}
+            </div>
+        </div>
+
+        
+        {% if "Address" in Session %}
+            <div class="ProfileIcon">
+                <div id="ProfileIcon">
+                    <img src="../static/Icons/ProfileIcon.png">
+
+                    <div class="Profile-Buttons">
+                        <a class="Profile-Button" href="/api/keys">API</a>
+                        <a class="Profile-Button" href="/logout">Logout</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </header>
+
+    
+    {% block body %}
+
+    {% endblock %}
+
+    
+    <div class="CopyRight">
+        <div class="CommunityChannels">
+            <div class="Community-Channel">
+                <a id="Community-Channel" href="https://www.youtube.com/channel/UC2tFLggEqPZw3w83dGvPteQ">
+                    <img src="../static/Icons/Youtube.png">
+                </a>
+            </div>
+
+            <div class="Community-Channel">
+                <a id="Community-Channel" href="https://discord.gg/HCgFUBPjQ7">
+                    <img src="../static/Icons/Discord.png">
+                </a>
+            </div>
+
+            <div class="Community-Channel">
+                <a id="Community-Channel" href="https://t.me/+GwMYFpiJpesxNWE0">
+                    <img src="../static/Icons/Telegram.png">
+                </a>
+            </div>
+
+            <div class="Community-Channel">
+                <a id="Community-Channel" href="https://github.com/PetasoftStudio/WalletCoin">
+                    <img src="../static/Icons/Github.png">
+                </a>
+            </div>
+        </div>
+
+        <div class="Sources">
+            <table class="SourcesTable">
+                <tr class="Sources-Header">
+                    <th class="Sources-Header-Title">Learn</th>
+                    <th class="Sources-Header-Title">API</th>
+                    <th class="Sources-Header-Title">Resources</th>
+                </tr>
+
+                <tr class="Sources-Line-0">
+                    <td class="Sources-Item">
+                        <a class="Sources-Item-Text" href="/help/center">Help Center</a>
+                    </td>
+
+                    <td class="Sources-Item">
+                        <a class="Sources-Item-Text" href="/api/rest">REST Api</a>
+                    </td>
+
+                    <td class="Sources-Item">
+                        <a class="Sources-Item-Text" href="/price">Price Chart</a>
+                    </td>
+                </tr>
+
+                <tr class="Sources-Line-1">
+                    <td class="Sources-Item">
+                        <a class="Sources-Item-Text" href="/FAQ">FAQ</a>
+                    </td>
+
+                    <td class="Sources-Item">
+                        <a class="Sources-Item-Text" href="/api/webPayments">Payments</a>
+                    </td>
+
+                    <td class="Sources-Item">
+                        <a class="Sources-Item-Text" href="/privacy">Privacy & Terms</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div ic="CopyRightTitle">
+            <span id="CopyRightTitleText">
+                <strong>Copyright © WalletCoin 2023</strong>
+            </span>
+        </div>
+    </div>
+  </body>
+</html>

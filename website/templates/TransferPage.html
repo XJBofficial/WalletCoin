@@ -7,36 +7,34 @@
   <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
   <link href="../static/style/Trade.css" rel="stylesheet">
   <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Trade.css') }}">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="{{ url_for('static', filename='js/Revolut.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/Buy.js') }}"></script>
 </head>
 
 
 <div class="Form">
-  <h1 class="BlackTitle">Buy WalletCoins</h1>
+  <h1 class="ClassicTitle">Send WalletCoins</h1>
   <div style="padding-bottom: 20px;"></div>
 
-  <div id="Buy-Balance">
-    <p class="ClassicText">Your balance: {{ Balance }} WLLC</p>
-  </div>
+  <p class="ClassicText">
+    <strong>Your balance: {{ Balance }} WLLC</strong>
+  </p>
 
+  <input class="Input" id="Wallet" name="Wallet" type="text" placeholder="Wallet" required>
   <div class="Amount-DIV">
-    <input class="Input" id="Amount" type="number" name="amount" placeholder="Amount" required>
+    <input class="Input" id="Amount" name="Amount" type="number" placeholder="Amount" required>
     <button class="CurrencyChangeButton" onclick="ChangeCurrency();"></button>
   </div>
 
   <div class="CalculatedAmount"></div>
   <div class="Notification"></div>
-  
-  <div id='revolut-pay'></div>
+
+  <button class="SendWalletCoins" onclick="Transfer();">Send WalletCoins</button>
 
 
   <script type="text/javascript">
+    const Recipient = document.querySelector("#Wallet");
     const Amount = document.querySelector("#Amount");
     const CurrencyChangeButton = document.querySelector(".CurrencyChangeButton");
     const CalculatedAmount = document.querySelector(".CalculatedAmount");
-    const RevolutPayButton = document.querySelector("#revolut-pay");
     const Notification = document.querySelector(".Notification");
 
     let Currency = "EUR";
@@ -59,29 +57,24 @@
 
 
     Amount.addEventListener("input", () => {
-      if (MinBetweenMax()) {
+      if (Min()) {
         if ( Notification.innerHTML != "" ) {
           Notification.innerHTML = "";
         }
-
-        RevolutPayButton.style.display = "block";
       } else {
-        Notification.innerHTML = "Min 10 €, Max 100,000 €.";
-        RevolutPayButton.style.display = "none";
+        Notification.innerHTML = "Min 3 €.";
       }
-
-      CalculatePrice();
     })
 
 
 
-    function MinBetweenMax() {
+    function Min() {
       if ( Currency == "EUR" ) {
-        if ( Amount.value >= 10 && Amount.value <= 100000 ) {
+        if ( Amount.value >= 3 ) {
           return true;
         }
       } else {
-        if ( Amount.value * Price >= 10 && Amount.value * Price <= 100000 ) {
+        if ( Amount.value * Price >= 3 ) {
           return true;
         }
       }
@@ -98,10 +91,10 @@
 
         if ( Currency == "WLLC" ) {
           // How much euros is those walletcoins
-          Final = Price * parseInt(Amount.value.toString())
+          Final = Price * Amount.value
         } else {
           // How much walletcoins is those euros
-          Final = parseInt(Amount.value.toString()) / Price
+          Final = Amount.value / Price
         }
         
 
@@ -111,13 +104,46 @@
 
 
         CalculatedAmount.innerHTML = `= ${Final} ${Currency} ( - ${Fee} Fee )`;
-        return Final;
+      }
+    }
+    
+
+
+    function Transfer() {
+      if (Min() && Recipient.value != "" && Amount.value > 0) {
+        let ResponseCode = 0;
+
+
+        fetch("/transaction", {
+          method: "POST",
+          body: JSON.stringify({
+            "Currency": Currency,
+            "Receiver": Recipient.value,
+            "Amount": parseFloat(Amount.value)
+          })
+        })
+        .then((response) => {
+          if ( response.redirected ) {
+            window.location.href = response.href;
+          } else {
+            ResponseCode = response.status;
+            
+            if ( ResponseCode == 500 ) {
+              Notification.innerHTML = "Internal server error.";
+            }
+          }
+        })
+        .then((data) => {
+          if ( ResponseCode != 500 ) {
+            Notification.innerHTML = data.result;
+          }
+        })
       }
     }
   </script>
 </div>
 
+<div style="padding-bottom: 300px;"></div>
 
-<div style="padding-bottom: 250px;"></div>
 
 {% endblock %}

@@ -1,0 +1,184 @@
+{% extends "Layout.html" %}
+
+{% block body %}
+
+
+<head>
+    <link href="../static/style/Style.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+    <link href="../static/style/Index.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Index.css') }}">
+</head>
+
+
+<div id="Index-MainContainer">
+    <h1 class="ClassicTitle">Welcome to WalletCoin!</h1>
+    
+    <p class="Index-Text">
+        The safest cryptocurrency network!
+    </p>
+
+    <div id="Index-LoginButton">
+        <a class="Button" href="/wallet/connect">
+            <strong>Connect</strong>
+        </a>
+    </div>
+</div>
+
+<div class="GlassificBackground">
+    <div class="Index-WalletCoinInfo-ForTypes">
+        <div class="Index-WalletCoinInfo-ForType">
+            <h1 class="Index-WalletCoinInfo-ForTypeTitle">For Individuals</h1>
+
+            <p class="Index-WalletCoinInfo-ForTypeText">
+                WalletCoin is cryptocurrency, you can invest and<br>
+                earn more money!
+            </p>
+        </div>
+
+        <div class="Index-WalletCoinInfo-ForType">
+            <h1 class="Index-WalletCoinInfo-ForTypeTitle">For Game Developers</h1>
+
+            <p class="Index-WalletCoinInfo-ForTypeText">
+                WalletCoin offers you a way to monetize your game!<br>
+                You can accept in-game-purchases or make an NFT<br>
+                game.
+            </p>
+        </div>
+
+        <div class="Index-WalletCoinInfo-ForType">
+            <h1 class="Index-WalletCoinInfo-ForTypeTitle">For Businesses</h1>
+
+            <p class="Index-WalletCoinInfo-ForTypeText">
+                WalletCoin is suitable for businesseses that accept<br>
+                cryptocurrency payments. You can use WalletCoin<br>
+                for your e-shop and your apps ( for all platforms ).
+            </p>
+        </div>
+    </div>
+
+    <div class="Index-WalletCoinInfo-SDKs">
+        <div class="Index-WalletCoinInfo-SDK">
+            <h1 class="Index-WalletCoinInfo-SDK-Title">Accept Payments</h1>
+
+            <div class="Index-WalletCoinInfo-SDK-Image">
+                <img src="../static/Icons/Shop.png" width="200px" height="200px">
+            </div>
+
+            <p class="Index-WalletCoinInfo-SDK-Text">
+                Integrate WalletCoin in your app and accept payments<br>
+                easy & fast from your customers!
+            </p>
+        </div>
+
+        <div class="Index-WalletCoinInfo-SDK">
+            <h1 class="Index-WalletCoinInfo-SDK-Title">Easy API for all platforms</h1>
+
+            <div class="Index-WalletCoinInfo-SDK-Image">
+                <img src="../static/Icons/RestApi.png" width="200px" height="200px">
+            </div>
+
+            <p class="Index-WalletCoinInfo-SDK-Text">
+                The tools that WalletCoin offers is easy-to-use for<br>
+                developers. Use WalletCoin for all the needs of your<br>
+                app and game!
+            </p>
+        </div>
+    </div>
+</div>
+
+
+<div class="Index-WalletCoinValuePanel">
+    <div class="GlassificBackground">
+        <div class="Index-WalletCoinValuePanel-Item">
+            <h3 class="Index-WalletCoinValuePanel-Item-Title">Supply</h3>
+            <p class="Index-WalletCoinValuePanel-Item-Text">{{ Supply }} WLLC</p>
+        </div>
+
+        <div class="Index-WalletCoinValuePanel-Item">
+            <h3 class="Index-WalletCoinValuePanel-Item-Title">In Stock</h3>
+            <p class="Index-WalletCoinValuePanel-Item-Text">{{ Stock }} WLLC</p>
+        </div>
+
+        <div class="Index-WalletCoinValuePanel-Item">
+            <h3 class="Index-WalletCoinValuePanel-Item-Title">Tokens Bought</h3>
+            <p class="Index-WalletCoinValuePanel-Item-Text">{{ Bought }} WLLC</p>
+        </div>
+    </div>
+</div>
+
+
+<div id="Index-WalletCoinInfo-0">
+    <div class="Index-WalletCoinInfo">
+        <div class="Index-WalletCoinInfo-Title">
+            <h1 id="Index-WalletCoinInfo-Title">A cryptocurrency for games!</h1>
+        </div>
+
+        <div class="Index-WalletCoinInfo-Text">
+            <p id="Index-WalletCoinInfo-Text">
+                WalletCoin is a good way to make play-to-earn games & nft games. Accept WalletCoins payments inside your game
+                in order players buy some goods in your game. Now game developers and gamers has more reasons to use this
+                Cryptocurrency and people has more reasons to make a videogame.
+            </p>
+        </div>
+
+        <video id="WalletCoinGif-FinancialReports" autoplay loop>
+            <source src="../static/Icons/Miner.mp4" type="video/mp4">
+        </video>
+    </div>
+</div>
+
+
+<div id="Index-WalletCoinInfo-1">
+    <div class="Index-WalletCoinInfo">
+        <div class="GlassificBackground">
+            <div class="Index-WalletCoinInfo-Title">
+                <h1 id="Index-WalletCoinInfo-Title">For all businesseses!</h1>
+            </div>
+
+            <div class="Index-WalletCoinInfo-Text">
+                <p id="Index-WalletCoinInfo-Text">
+                    WalletCoin offers a lot of tools for all platforms to make businesseses accept cryptocurrency payments. Either you
+                    have an e-shop or a mobile app, you can use WalletCoin API to accept cryptocurrency payments from your customers.
+                </p>
+            </div>
+
+            <video id="WalletCoinGif-FuturisticTecnology" autoplay loop>
+                <source src="../static/Icons/GroupWorking.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
+</div>
+
+
+<div id="Index-WalletCoinInfo-2">
+    <div class="Index-WalletCoinInfo">
+        <div class="Index-WalletCoinInfo-Title">
+            <h1 id="Index-WalletCoinInfo-Title">Low Fees!</h1>
+        </div>
+
+        <div class="Index-WalletCoinInfo-Text">
+            <p id="Index-WalletCoinInfo-Text">
+                No more fees! Buy, Sell, Send in WalletCoin with low fees!
+            </p>
+        </div>
+    </div>
+</div>
+
+
+<div class="Index-WalletCoinInfo">
+    <div  id="Index-GetYourWallet">
+        <h1 class="BlackTitle">Get your wallet</h1>
+        <p class="ClassicText">
+            Start a WalletCoin account in web<br>
+            ( Mobile wallet coming soon )<br>
+        </p>
+
+        <a class="Button" href="/wallet/connect">
+            <strong>Get Started</strong>
+        </a>
+    </div>
+</div>
+
+
+{% endblock %}

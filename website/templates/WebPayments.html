@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="../static/style/WebPayments.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style/WebPayments.css') }}">
+        <title>WalletCoin - WebPayments</title>
+    </head>
+
+    <body class="Background">
+        <div class="WebPayments-Payment">
+            <div class="Form">
+                <div class="Form-Header">
+                    <h1 class="Form-Title">WalletCoin Payment</h1>
+                    <label id="Form-Wallet">Pay {{ Wallet }}</label>
+                    <label id="Amount">Amount: {{ Amount }} WLLC</label>
+                </div>
+                
+                <div class="Form-Section">
+                    <label id="Description">
+                        {{ Description }}
+                    </label>
+                </div>
+
+                <div class="Form-Section">
+                    <input class="Form-Input" name="PrivateKey" id="PrivateKey" type="password" placeholder="Private Key">
+                    <input class="Form-Input" name="SecretPhrase" id="SecretPhrase" type="password" placeholder="Secret Phrase">
+                </div>
+
+                <div class="Form-Button">
+                    <button id="Form-Button" onclick="PayNow();">Complete Payment</button>
+                    <button id="Form-Button-Transparent" onclick="ClosePayment();">Cancel</button>
+                </div>
+            </div>
+        </div>
+        
+
+        <script type="text/javascript">
+            const PrivateKeyInput = document.querySelector("#PrivateKey");
+            const SecretPhraseInput = document.querySelector("#SecretPhrase");
+            const SuccessUrl = "{{ Success }}";
+            const FailedUrl = "{{ Failed }}";
+            const CancelUrl = "{{ Cancel }}";
+
+
+            function PayNow() {
+                if ( PrivateKeyInput.value != "" && SecretPhraseInput.value != "" ) {
+                    fetch("/payments/{{ Invoice }}/execute", {
+                        headers: {
+                            "content-type": "application/json"
+                        },
+                        method: "POST",
+                        body: JSON.stringify({
+                            "Seller": "{{ Wallet }}",
+                            "PrivateKey": PrivateKeyInput.value,
+                            "SecretPhrase": SecretPhraseInput.value
+                        })
+                    }).then((response) => {
+                        if ( response.status == response.ok ) {
+                            window.location.href = SuccessUrl;
+                        } else {
+                            window.location.href = FailedUrl;
+                        }
+                    })
+                }
+            }
+
+
+            function ClosePayment() {
+                window.location.href = CancelUrl;
+            }
+        </script>
+    </body>
+</html>

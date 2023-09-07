@@ -1,0 +1,184 @@
+{% extends 'Layout.html' %}
+
+{% block body %}
+
+<head>
+  <link href="../static/style/Style.css" rel="stylesheet">
+  <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+  <link href="../static/style/Trade.css" rel="stylesheet">
+  <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Trade.css') }}">
+</head>
+
+
+<div class="Form">
+  <h1 class="ClassicTitle">Sell WalletCoins</h1>
+  <div style="padding-bottom: 20px;"></div>
+
+  <div id="Sell-Balance">
+    <p class="ClassicText">
+      <strong>Your balance: {{ Balance }} WLLC</strong>
+    </p>
+  </div>
+  
+  <div class="Amount-DIV">
+    <input class="Input" id="Name" type="text" name="name" placeholder="Your Full Name" required>
+    <input class="Input" id="Amount" type="number" name="amount" placeholder="Amount" required>
+    <button class="CurrencyChangeButton" onclick="ChangeCurrency();"></button>
+  </div>
+
+  <div class="CalculatedAmount"></div>
+  <div class="Notification"></div>
+
+  <button class="SellWalletCoins" onclick="GetPaidNow();">Sell WalletCoins</button>
+
+  
+  <script type="text/javascript">
+    const FullName = document.querySelector("#Name");
+    const Amount = document.querySelector("#Amount");
+    const CurrencyChangeButton = document.querySelector(".CurrencyChangeButton");
+    const CalculatedAmount = document.querySelector(".CalculatedAmount");
+    const Notification = document.querySelector(".Notification");
+
+    let Currency = "EUR";
+    let Price = parseFloat("{{ Price }}");
+
+    ChangeCurrency();
+
+
+    if ( "RestoreId" ) {
+      Amount.style.display = "none";
+    }
+
+
+
+    function ChangeCurrency() {
+      CurrencyChangeButton.innerHTML = Currency;
+
+      if ( Currency == "EUR" ) {
+        Currency = "WLLC";
+      } else {
+        Currency = "EUR";
+      }
+    }
+
+
+
+    Amount.addEventListener("input", () => {
+      if (Min()) {
+        if ( Notification.innerHTML != "" ) {
+          Notification.innerHTML = "";
+        }
+      } else {
+        Notification.innerHTML = "Min 10 €.";
+      }
+    })
+
+
+
+    function Min() {
+      if ( Currency == "EUR" ) {
+        if ( Amount.value >= 10 ) {
+          return true;
+        }
+      } else {
+        if ( Amount.value * Price >= 10 ) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+
+
+    function CalculatePrice() {
+      if ( Price != null ) {
+        let Final = 0;
+
+
+        if ( Currency == "WLLC" ) {
+          // How much euros is those walletcoins
+          Final = Price * Amount.value
+        } else {
+          // How much walletcoins is those euros
+          Final = Amount.value / Price
+        }
+        
+
+        // Calculate fees
+        var Fee = (Final * 0.5) / 100.0
+        Final -= Fee
+
+
+        CalculatedAmount.innerHTML = `= ${Final} ${Currency} ( - ${Fee} Fee )`;
+      }
+    }
+    
+
+
+    function GetPaidNow() {
+      if ( "{{ RestoreId }}" ) {
+        fetch("/sell?restore={{ RestoreId }}", {
+          method: "POST"
+        })
+        .then((response) => {
+          if ( response.status != 200 ) {
+            switch (response.status) {
+              case 500:
+                Notification.innerHTML = "Payout is already completed.";
+                break;
+              
+              case 404:
+                Notification.innerHTML = "Payout not found.";
+                break;
+            }
+          }
+
+          return response.json();
+        })
+        .then((data) => {
+          if ( "Url" in data ) {
+            window.location.href = data["Url"];
+          }
+        })
+      } else {
+        if (Min() && FullName.value.length > 0) {
+            fetch("/sell", {
+              method: "POST",
+              body: JSON.stringify({
+                "Name": FullName.value,
+                "Currency": Currency,
+                "Amount": parseFloat(Amount.value)
+              })
+            })
+            .then((response) => {
+              if ( response.status != 200 ) {
+                switch (response.status) {
+                  case 400:
+                    Notification.innerHTML = "Min 10 €.";
+                    break;
+                  
+                  case 500:
+                    Notification.innerHTML = "Internal server error.";
+                    break;
+                }
+              }
+
+              return response.json();
+            })
+            .then((data) => {
+              if ( "Url" in data ) {
+                window.location.href = data["Url"];
+              }
+            })
+          }
+        }
+      }
+  </script>
+</div>
+
+
+<div style="padding-bottom: 250px;"></div>
+
+
+{% endblock %}

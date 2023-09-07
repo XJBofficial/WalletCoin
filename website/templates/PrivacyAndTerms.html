@@ -1,0 +1,140 @@
+{% extends "Layout.html" %}
+
+{% block body %}
+
+
+<head>
+    <link href="../static/style/Style.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+    <link href="../static/style/PrivacyAndTerms.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Privacy.css') }}">
+</head>
+    
+
+<div class="Privacy">
+    <div class="Privacy-Info">
+        <h1 class="Privacy-Info-Title">WalletCoin Privacy Policy & Terms</h1>
+        <p class="Privacy-Info-Text">
+            This Page includes all the terms of use & our privacy policy. We appreciate
+            your trust to WalletCoin and we are trying the most to protect your funds.
+            We are honored if you spend some of your time to read all the terms of our
+            privacy policy.
+        </p>
+    </div>
+
+
+    <div class="Privacy-Info">
+        <h1 class="Privacy-Info-Title">1. Your information is secure</h1>
+        <p class="Privacy-Info-Text">
+            It is our duty to protect the funds of our users & the their privacy. We never
+            share your sensitive information like your wallet credentials & we never use
+            this data.
+        </p>
+    </div>
+
+
+    <div class="Privacy-Info">
+        <h1 class="Privacy-Info-Title">2. Wallet Protection</h1>
+        <p class="Privacy-Info-Text">
+            Cryptocurrencies is different business. They need to promise to its users the
+            protection of their funds. WalletCoin has developed a secure system for its
+            users.
+        </p>
+    </div>
+
+
+    <div class="Privacy-SubInfo">
+        <h2 class="Privacy-Info-SubTitle">2.1. Wallet Connect</h2>
+        <p class="Privacy-Info-Text">
+            Wallets in WalletCoin is different than the other crypto wallets. On the other
+            Cryptocurrencies you need a secret phrase to connect to your wallet. In WalletCoin
+            you need your private key & your secret phrase. This is more secure because
+            is impossible for someone break the combination of your key & phrase in order
+            to connect to your wallet.
+        </p>
+    </div>
+
+
+    <div class="Privacy-SubInfo">
+        <h2 class="Privacy-Info-SubTitle">2.2. Important Advice</h2>
+        <p class="Privacy-Info-Text">
+            Please never share your private key or secret phrase of your wallet. If you do
+            that, you will lose all your money. Key & phrase of your wallet is personal data
+            and is only about you.
+        </p>
+    </div>
+
+
+    <div class="Privacy-SubInfo">
+        <h2 class="Privacy-Info-SubTitle">2.3. Connect your wallet on this website</h2>
+        <p class="Privacy-Info-Text">
+            Never connect your wallet outside this website. If an app, a game or a website ask
+            you to connect your wallet please ignore it because its developers wanna scam you
+            and steal your credentials. If they redirect you to a website similar to WalletCoin
+            website, please check the domain name. The official domain of WalletCoin website
+            is <strong>walletcoincrypto.com</strong>. If the website domain doesn't match to the official domain
+            of WalletCoin, please leave the site.
+        </p>
+    </div>
+
+
+    <div class="Privacy-SubInfo">
+        <h2 class="Privacy-Info-SubTitle">2.4. Never share your credentials outside this website</h2>
+        <p class="Privacy-Info-Text">
+            If an app, a game or a website ask you to transfer money via its system, ignore it.
+            To transfer money via the API of WalletCoin you need your private key, your wallet
+            address & your private key. You can use this credentials to transfer money on your
+            apps you have made, but never give this information to apps that you don't trust.
+        </p>
+    </div>
+
+
+    <div class="Privacy-Info">
+        <h1 class="Privacy-Info-Title">3. Money Protection</h1>
+        <p class="Privacy-Info-Text">
+            WalletCoin protect the funds of its clients. Included the impenetrable security system
+            of your wallet, WalletCoin has take Important actions to prevent users lose their money.
+        </p>
+    </div>
+
+
+    <div class="Privacy-SubInfo">
+        <h2 class="Privacy-Info-SubTitle">3.1. Selling Coins</h2>
+        <p class="Privacy-Info-Text">
+            When you sell your coins, we promise that you will receive the money to your
+            bank account as soon as its possible.
+        </p>
+    </div>
+
+
+    <div class="Privacy-SubInfo">
+        <h2 class="Privacy-Info-SubTitle">3.2. Restore money</h2>
+        <p class="Privacy-Info-Text">
+            Every payout is saved to our servers. When you sell your WalletCoins, a payout
+            link is generated and your coins leave from your WalletCoin. When you redirect
+            the payout link, you have to choose a payout method ( revolut or bank account )
+            and type your information to receive your money. In the case of you leave from
+            this link or payout failed, you can receive your money again. This is how to restore
+            them: 1. Login to your wallet, 2. Go to link https://walletcoincrypto.com/lastPayout,
+            3. Copy payout Id, 4. Go to https://walletcoincrypto.com/sell?restore=payout_id_here,
+            4. Click sell and receive your money again. In the case the link has expired, contact
+            us & we will send your money directly to you.
+        </p>
+    </div>
+
+
+    <div class="Privacy-Info">
+        <h1 class="Privacy-Info-Title">4. API Integration</h1>
+        <p class="Privacy-Info-Text">
+            WalletCoin API is the easiest way to use WalletCoin into the apps you have made.
+            WalletCoin has defined terms for the API use in order to prevent the fraud. Never
+            ask your users on your apps give their credentials to connect to their wallets or
+            transfer some money. There are the risk of fishing. In the case of scam the users
+            of your app and steal their wallets credentials you will be procecuded and end up
+            in prison.
+        </p>
+    </div>
+</div>
+
+
+{% endblock %}

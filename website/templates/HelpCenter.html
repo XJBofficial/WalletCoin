@@ -1,0 +1,18 @@
+{% extends 'Layout.html' %}
+
+{% block body %}
+
+<head>
+  <link href="../static/style/Style.css" rel="stylesheet">
+  <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+</head>
+
+
+<h1 class="ClassicTitle">Help Center</h1>
+<p class="ClassicText">
+    Have you got any problem while using walletcoin service? We can help.<br>
+    Send us an email message to <strong>support@walletcoincrypto.com</strong> and we will<br>
+    contact you as soon as possible.
+</p>
+
+{% endblock %}

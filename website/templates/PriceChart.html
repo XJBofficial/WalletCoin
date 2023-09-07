@@ -1,0 +1,152 @@
+{% extends "Layout.html" %}
+
+{% block body %}
+
+
+<head>
+    <link href="../static/style/Style.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Style.css') }}">
+    <link href="../static/style/PriceChart.css" rel="stylesheet">
+    <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/PriceChart.css') }}">
+</head>
+
+
+<div class="GlassificBackground">
+  <div class="WalletCoinPrice">
+    <div class="Price-Changing">
+      {% if Changed == "Increase" %}
+        <img id="Price-Changing-Icon" src="{{ url_for('static', filename='Icons/Price-Increased.png') }}">
+        <span id="Price-Increased">
+          <strong>+{{ PriceChange }}%</strong>
+        </span>
+      {% endif %}
+
+      {% if Changed == "Decrease" %}
+          <img id="Price-Changing-Icon" src="{{ url_for('static', filename='icons/Price-Decreased.png') }}">
+          <span id="Price-Decreased">
+            <strong>{{ PriceChange }}%</strong>
+          </span>
+      {% endif %}
+    </div>
+
+    <div class="WalletCoinPrice-Value">
+      <h1 id="WalletCoinPrice-Value">{{ Price }} EUR</h1>
+    </div>
+  </div>
+
+  <div class="ValueChart">
+    <div class="ValueChartTimes">
+      <ul id="ValueChartTimes">
+          <li id="ValueChartTimeButton">
+              <a id="ValueChartToday" href="/price?time=hours&day={{ Date[0] }}&month={{ Date[1] }}&year={{ Date[2] }}">
+                  <strong>Today</strong>
+              </a>
+          </li>
+          <li id="ValueChartTimeButton">
+              <a id="ValueChartThisMonth" href="/price?time=days&month={{ Date[1] }}&year={{ Date[2] }}">
+                  <strong>This Month</strong>
+              </a>
+          </li>
+          <li id="ValueChartTimeButton">
+              <a id="ValueChartThisYear" href="/price?time=months&year={{ Date[2] }}">
+                  <strong>This Year</strong>
+              </a>
+          </li>
+      </ul>
+    </div>
+    <canvas id="Chart"></canvas>
+
+    <div class="StatisticsWall">
+      <ul class="StatisticsWall-Line">
+        <div class="StatisticsWall-Item">
+          <strong class="StatisticsWall-Item-Title">Price Changed</strong>
+          <label class="StatisticsWall-Item-Value">{{ Change }}</label>
+        </div>
+
+        <div class="StatisticsWall-Item">
+          <strong class="StatisticsWall-Item-Title">Volume</strong>
+          <label class="StatisticsWall-Item-Value">{{ Volume }} EUR</label>
+        </div>
+
+        <div class="StatisticsWall-Item">
+          <strong class="StatisticsWall-Item-Title">Market Cap</strong>
+          <label class="StatisticsWall-Item-Value">{{ MarketCap }} EUR</label>
+        </div>
+      </ul>
+
+      <ul class="StatisticsWall-Line">
+        <div class="StatisticsWall-Item">
+          <strong class="StatisticsWall-Item-Title">Owned</strong>
+          <label class="StatisticsWall-Item-Value">{{ Owned }} WLLC</label>
+        </div>
+
+        <div class="StatisticsWall-Item">
+          <strong class="StatisticsWall-Item-Title">For Sell</strong>
+          <label class="StatisticsWall-Item-Value">{{ ForSell }} WLLC</label>
+        </div>
+
+        <div class="StatisticsWall-Item">
+          <strong class="StatisticsWall-Item-Title">Price</strong>
+          <label class="StatisticsWall-Item-Value">{{ Price }} EUR</label>
+        </div>
+      </ul>
+    </div>
+  </div>
+
+  <div class="TradingPanel">
+    <h2 class="TradingPanel-Title">Ready To Invest in WalletCoin?</h2>
+    <p id="TradingPanel-Text">
+      Are you ready to invest in WalletCoin? Please buy some WalletCoins now,
+      or wait until the price falls. Please be aware of the credentials on your wallet
+        ( private key, secret phrase ). If you forgot this data you will lose your funds.
+        Also, don't share this secrets to other people.
+    </p>
+
+    <a class="BuyButton" href="buy">
+      <strong>Buy</strong>
+    </a>
+  </div>
+    
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+  <script type="text/javascript">
+    var Chart_ = document.getElementById("Chart").getContext("2d");
+    var Stats = {{ Chart | safe }};
+
+    
+    let XAxis = [];
+    let YAxis = [];
+
+
+    Stats.forEach(item => {
+      XAxis.push(item["Tag"]);
+      YAxis.push(item["Value"]);
+    });
+
+
+    var NewChart = new Chart(Chart_, {
+        type: "line",
+        data: {
+            labels: XAxis,
+            datasets: [{
+                fill: false,
+                lineTension: 1,
+                borderColor: "rgb(75, 192, 192)",
+                data: YAxis
+            }]
+        },
+        options: {
+            legend: {
+              display: true
+            },
+            responsive: false
+        }
+    })
+  </script>
+</div>
+
+
+<div style="padding-bottom: 150px;"></div>
+
+
+{% endblock %}
