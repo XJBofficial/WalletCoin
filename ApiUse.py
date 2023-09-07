@@ -1,80 +1,187 @@
 import requests
 
 
-
-def priceChart(TimeFrame : str, Day : str, Month : str, Year : str):
-    result = requests.get("http://127.0.0.1:5000/api/price/chart/?TimeFrame=%s&Day=%sMonth=%s&Year=%s" % (TimeFrame, Day, Month, Year))
-    print(result.text)
+API = "http://127.0.0.1:3049"
 
 
-def connectAccount(AccessToken):
-    result = requests.get("http://127.0.0.1:5000/api/auth/?AccessToken=" + AccessToken)
-    print(result.text)
+
+def Price():
+    Result = requests.get(url=API + "/api/price")
+    print(Result.json())
 
 
-def walletCreate(Password):
-    result = requests.post("http://127.0.0.1:5000/api/wallet/create/?Pass=" + Password)
-    print(result.text)
+
+def PriceChartMonths(Year : int):
+    Result = requests.get(url=API + "/api/price/chart?list=months&year=" + str(Year))
+    print(Result.json())
 
 
-def walletConnect(AccessToken):
-    result = requests.get("http://127.0.0.1:5000/api/wallet/connect/?AccessToken=" + AccessToken)
-    print(result.text)
+
+def PriceChartDays(Year : int, Month : int):
+    Result = requests.get(url=API + "/api/price/chart?list=days&year=%s&month=%s" % (str(Year), str(Month)))
+    print(Result.json())
 
 
-def transcate(Access, Wallet, Amount):
-    result = requests.post("http://127.0.0.1:5000/api/transaction/?AccessToken=%s&WalletAddress=%s&Amount=%s" % (Access, Wallet, Amount))
-    print(result.text)
+
+def PriceChartHours(Year : int, Month : int, Day : int):
+    Result = requests.get(url=API + "/api/price/chart?list=hours&year=%s&month=%s&day=%s" % (str(Year), str(Month), str(Day)))
+    print(Result.json())
 
 
-def payGame(game, purchaser, amount):
-    result = requests.post("http://127.0.0.1:5000/api/payToPlay?game=%s&purchaser=%s&amount=%s" % (game, purchaser, amount))
-    print(result.text)
+
+def WalletConnect(PrivateKey : str, SecretPhrase : str, Wallet : str, APIkey : str):
+    Body = {
+        "private_key": PrivateKey,
+        "secret_phrase": SecretPhrase,
+        "wallet": Wallet,
+        "api_key": APIkey
+    }
+    Result = requests.post(API + "/api/wallet/auth", data=Body)
+    print(Result.json())
+
+
+
+def Transcate(PrivateKey : str, Recipient : str, Amount : float, Wallet : str, APIkey : str):
+    Body = {
+        "private_key": PrivateKey,
+        "recipient": Recipient,
+        "amount": Amount,
+        "wallet": Wallet,
+        "api_key": APIkey
+    }
+    Result = requests.post(url=API + "/api/wallet/transaction", data=Body)
+    print(Result.json())
+
+
+
+def Withdraw(PrivateKey : str, WithdrawTo : str, Amount : float, Wallet : str, APIkey : str):
+    Body = {
+        "private_key": PrivateKey,
+        "withdraw_to": WithdrawTo,
+        "amount": Amount,
+        "wallet": Wallet,
+        "api_key": APIkey
+    }
+    Result = requests.post(url=API + "/api/wallet/withdraw", data=Body)
+    print(Result.json())
+
+
+
+def Deposit(PrivateKey : str, DepositTo : str, Amount : float, Wallet : str, APIkey : str):
+    Body = {
+        "private_key": PrivateKey,
+        "deposit_to": DepositTo,
+        "amount": Amount,
+        "wallet": Wallet,
+        "api_key": APIkey
+    }
+    Result = requests.post(url=API + "/api/wallet/deposit", data=Body)
+    print(Result.json())
+
+
+
+def Payment(PrivateKey : str, Description : str, Amount : float, Urls : dict, Wallet : str, APIkey : str):
+    Body = {
+        "private_key": PrivateKey,
+        "description": Description,
+        "amount": Amount,
+        "success_url": Urls["success"],
+        "failed_url": Urls["failed"],
+        "cancel_url": Urls["cancel"],
+        "wallet": Wallet,
+        "api_key": APIkey
+    }
+    Result = requests.post(url=API + "/api/webPayments", data=Body)
+    print(Result.json())
 
 
 
 while True:
-    action = input("Action: ")
+    Action = input("Action: ")
 
 
-    if action == "priceChart":
-        TimeFrame = input("TimeFrame: ")
-        Day = input("Day: ")
-        Month = input("Month: ")
-        Year = input("Year: ")
-
-        priceChart(TimeFrame=TimeFrame, Day=Day, Month=Month, Year=Year)
+    if Action == "price":
+        Price()
 
 
-    if action == "auth":
-        AccessToken = input("Access Token: ")
-
-        connectAccount(AccessToken=AccessToken)
-    
-
-    if action == "walletCreate":
-        Pass = input("Password: ")
-
-        walletCreate(Password=Pass)
-    
-
-    if action == "walletConnect":
-        AccessToken = input("AccessToken: ")
-
-        walletConnect(AccessToken=AccessToken)
+    if Action == "priceChart":
+        List = input("List: ")
 
 
-    if action == "transaction":
-        AccessToken = input("AccessToken: ")
+        if not List in ["hours", "days", "months"]:
+            print("Invalid argument.")
+        else:
+            if List == "hours":
+                Day = int(input("Day: "))
+                Month = int(input("Month: "))
+                Year = int(input("Year: "))
+
+                PriceChartHours(Year=Year, Month=Month, Day=Day)
+            
+            elif List == "days":
+                Month = int(input("Month: "))
+                Year = int(input("Year: "))
+
+                PriceChartDays(Year=Year, Month=Month)
+            
+            else:
+                Year = int(input("Year: "))
+                PriceChartMonths(Year=Year)
+
+
+    if Action == "walletConnect":
         Wallet = input("Wallet: ")
-        Amount = input("Amount: ")
+        ApiKey = input("API_KEY: ")
+        PrivateKey = input("PrivateKey: ")
+        SecretPhrase = input("SecretPhrase: ")
 
-        transcate(Access=AccessToken, Wallet=Wallet, Amount=Amount)
+        WalletConnect(PrivateKey=PrivateKey, SecretPhrase=SecretPhrase, Wallet=Wallet, APIkey=ApiKey)
+
+
+    if Action == "transaction":
+        Wallet = input("Wallet: ")
+        ApiKey = input("API_KEY: ")
+        PrivateKey = input("PrivateKey: ")
+        Recipient = input("Recipient: ")
+        Amount = float(input("Amount: "))
+
+        Transcate(PrivateKey=PrivateKey, Recipient=Recipient, Amount=Amount, Wallet=Wallet, APIkey=ApiKey)
     
 
-    if action == "payGame":
-        game = input("Game: ")
-        purchaser = input("Purchaser: ")
-        amount = float(input("Amount: "))
+    if Action == "withdraw":
+        Wallet = input("Wallet: ")
+        ApiKey = input("API_KEY: ")
+        PrivateKey = input("PrivateKey: ")
+        WithdrawTo = input("Withdraw To: ")
+        Amount = float(input("Amount: "))
 
-        payGame(game, purchaser, amount)
+        Withdraw(PrivateKey=PrivateKey, WithdrawTo=WithdrawTo, Amount=Amount, Wallet=Wallet, APIkey=ApiKey)
+    
+
+    if Action == "deposit":
+        Wallet = input("Wallet: ")
+        ApiKey = input("API_KEY: ")
+        PrivateKey = input("PrivateKey: ")
+        DepositTo = input("Deposit To: ")
+        Amount = float(input("Amount: "))
+
+        Deposit(PrivateKey=PrivateKey, DepositTo=DepositTo, Amount=Amount, Wallet=Wallet, APIkey=ApiKey)
+
+
+    if Action == "payment":
+        Wallet = input("Wallet: ")
+        ApiKey = input("API_KEY: ")
+        PrivateKey = input("PrivateKey: ")
+        Description = input("Description: ")
+        Amount = float(input("Amount: "))
+        SuccessUrl = input("Success url: ")
+        FailedUrl = input("Failed url: ")
+        CancelUrl = input("Cancel url: ")
+
+        Urls = {
+            "success": SuccessUrl,
+            "failed": FailedUrl,
+            "cancel": CancelUrl
+        }
+
+        Payment(PrivateKey=PrivateKey, Description=Description, Amount=Amount, Urls=Urls, Wallet=Wallet, APIkey=ApiKey)

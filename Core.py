@@ -1,1442 +1,1446 @@
-from flask import Flask, render_template, flash, redirect, url_for, session, request, jsonify
-from functools import wraps
-from Forms import *
+from flask import Flask, request, jsonify
+from Blockchain import Blockchain
+from Wallet import Wallet, Transaction
+from Cryptography import Cryptography
 
-import UsefulFunctions as Functions
 import datetime as DateTime
-import smtplib as SMTP
-import DISKuse as Disk
-import time as Time
-import json as Json
-import os as OS
+import json as JSON
 import Database
-import Security
+import os as OS
 
 
 
-def InitializeApp():
-    app = Flask(__name__)
-    app.config.from_mapping(SECRET_KEY = OS.environ.get('SECRET_KEY') or 'dev_key')
+CORE = Flask(__name__)
+CORE.config.from_mapping(SECRET_KEY = OS.environ.get('SECRET_KEY') or 'dev_key')
 
-    return app
+WebsiteDomain = "http://127.0.0.1:3047"
 
 
+# Cache data = = = = = = = = = = = = = = = = = = =
 
-def ThrowNotification(Text : str):
-    flash(Text)
+Wallets = dict()
+DeletedWallets = []
+PrivateKeys = dict()
+DeletedPrivateKeys = []
+Payouts = dict()
+Blockchain_ = []
+PriceChart = dict()
+PriceNow : float = Database.GetPrice()
 
+Vault = Database.Vault()
 
 
-app = InitializeApp()
-Session = session
+Earnings = {
+    "WLLC": 0,
+    "EUR": 0
+}
 
+# Fees
+Fees_Buy = 0.5 # %
+Fees_Sell = 0.5 # %
+Fees_Transcate = 0.5 # %
 
 
-# Wrap to define if the user is currently logged in from session
-def is_logged_in(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else:
-            return redirect(url_for('login'))
-    return wrap
+# Api
+ApiInvoices = dict()
 
+# End of Cache data = = = = = = = = = = = = = = = =
 
 
-# Log in the user by updating session
-def Login(Username):
-    User = Database.GetUserData(Username)
 
+# B L O C K C H A I N = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-    # 0: Username, 1: Name, 2: Avatar, 3: Email, 4: Password, 5: Balance, 6: WalletAddress, 7: PrivateKey 8: Games 9: Stocks
-    Session['logged_in'] = True
-    Session['Username'] = Username
-    Session['Name'] = User[1]
-    Session["Avatar"] = User[2]
-    Session['Email'] = User[3]
-    Session['WalletAddress'] = User[6]
-    Session["PrivateKey"] = User[7]
-    Session["AccessToken"] = User[8]
-    Session["Games"] = User[9]
-    Session["Stocks"] = User[10]
+@CORE.route("/blockchain", methods=["GET"])
+def GetBlockchain():
+    Chain = Blockchain()
 
-    
-    if str(User[4]).startswith("-"):
-        Session["Balance"] = 0.00
-    else: Session["Balance"] = User[5]
+    return jsonify({
+        "result": Chain.GetLastBlocks(CacheBlocks=Blockchain_, Count=10)
+    }), 200
 
 
 
-@app.route("/")
-def index():
-    CryptoCurrencyData = Database.GetCryptoData()
+@CORE.route("/block", methods=["GET"])
+def GetBlock():
+    Params = request.args
+    List = Params.get("list")
+    Chain = Blockchain()
 
 
-    Price = CryptoCurrencyData[0]
-    Tokens = CryptoCurrencyData[1]
-    Market = CryptoCurrencyData[2]
-    Bought = CryptoCurrencyData[3]
-    BoughtValue = CryptoCurrencyData[4]
-    Sold = CryptoCurrencyData[5]
-    SoldValue = CryptoCurrencyData[6]
+    if List == "Wallet":
+        Wallet = Params.get("wallet")
 
-
-    return render_template('Index.html',
-    Price=Price,
-    Tokens=Tokens,
-    Market=Market,
-    Bought=Bought,
-    Sold=Sold,
-    BoughtValue=BoughtValue,
-    SoldValue=SoldValue,
-    Session=Session)
-
-
-
-@app.route("/logout")
-@is_logged_in
-def logout():
-    CryptoCurrencyData = Database.GetCryptoData()
-
-
-    Price = CryptoCurrencyData[0]
-    Tokens = CryptoCurrencyData[1]
-    Market = CryptoCurrencyData[2]
-    Bought = CryptoCurrencyData[3]
-    BoughtValue = CryptoCurrencyData[4]
-    Sold = CryptoCurrencyData[5]
-    SoldValue = CryptoCurrencyData[6]
-
-
-    return render_template('Index.html',
-    Price=Price,
-    Tokens=Tokens,
-    Market=Market,
-    Bought=Bought,
-    Sold=Sold,
-    BoughtValue=BoughtValue,
-    SoldValue=SoldValue,
-    Session=Session)
-
-
-
-@app.route("/settings", methods=["POST", "GET"])
-def settings():
-    if request.method == "GET":
-        Session["ConfirmationEmailSent"] = False
-        return render_template("UserSettings.html", Status="Form", Session=Session)
-
-
-    if request.method == "POST":
-        if not Session["ConfirmationEmailSent"]:
-            Username = request.form["Username"]
-            Email = request.form["Email"]
-
-            PreviousPassword = request.form["PreviousPassword"]
-            NewPassword = request.form["NewPassword"]
-
-
-
-            if Username != "" and PreviousPassword != "":
-                Status = Database.UserSettings(Session["Username"], PreviousPassword)
-
-
-
-            elif Username != "" and PreviousPassword == "":
-                Status = Database.UserSettings(Session["Username"], None)
-
-
-            elif PreviousPassword != "" and Username == "":
-                Status = Database.UserSettings(Session["Username"], PreviousPassword)
-
-
-            elif Username == "" and PreviousPassword == "":
-                Status = Database.UserSettings(Session["Username"], None)
-
-
-
-            if Status == "WrongPass":
-                flash("Previous Password doesnt match...")
-
-                Time.sleep(3)
-                flash("")
-                return render_template("UserSettings.html", Status="Form", Session=Session)
-
-
-            if Status == "EmailSent":
-                Session["AccountChangingUsername"] = Username,
-                Session["AccountChangingEmail"] = Email,
-                Session["AccountChangingNewPassword"] = NewPassword
-
-
-                Sender = "walletcoinofficial@gmail.com"
-                Receiver = Session["Email"]
-                Session["AccountChangingConfirmCode"] = Functions.CreateRandomKey(5)
-
-                EmailText = """
-                    Hello WalletCoin user !!!
-
-                    Someone tried to change your account settings in account '{0}'.
-                    If you are this person, your confirmation code is {1} else
-                    ignore this email now.
-                """.format(Session["Username"], Session["AccountChangingConfirmCode"])
-
-
-                with SMTP.SMTP("smtp.gmail.com", 587) as Server:
-                    Server.starttls()
-                    Server.login(Sender, "KonDev17")
-                    Server.sendmail(Sender, Receiver, EmailText)
-
-
-                Session["ConfirmationEmailSent"] = True
-                return render_template("UserSettings.html", Status="EmailSent", Session=session)
-        
-        else:
-            if request.form["ConfCode"] != Session["AccountChangingConfirmCode"]:
-                flash("Confirmation Code is wrong... try again...")
-
-                Time.sleep(3)
-                flash("")
-                return render_template("UserSettings.html", Status="EmailSent", Session=session)
-        
-            else:
-                User = Database.GetUserData(Session["Username"])
-
-
-                # 0: Username, 1: Name, 2: Avatar, 3: Email, 4: Password, 5: Balance, 6: WalletAddress, 7: PrivateKey, 9: AccessToken, 8: Games, 9: Stocks
-                NewUser = {"Username": User[0],
-                        "Name": User[1],
-                        "Avatar": User[2],
-                        "Email": User[3],
-                        "Password": User[4],
-                        "Balance": User[5],
-                        "WalletAddress": User[6],
-                        "PrivateKey": User[7],
-                        "AccessToken": User[8],
-                        "Games": User[9],
-                        "Stocks": User[10]}
-            
-
-                if "AccountChangingUsername" in Session:
-                    NewUser["Username"] = Session["AccountChangingUsername"]
-                    del Session["AccountChangingUsername"]
-
-
-                if "AccountChangingEmail" in Session:
-                    NewUser["Email"] = Session["AccountChangingEmail"]
-                    del Session["AccountChangingEmail"]
-
-
-                if "AccountChangingNewPassword" in Session:
-                    NewUser["Password"] = Session["AccountChangingNewPassword"]
-                    del Session["AccountChangingNewPassword"]
-
-
-#                with open("Users.json", "r") as File:
-#                    Users = Json.loads(File.read())
-#                    del Users["Users"][Session["Username"]]
-
-
-#                    with open("Users.json", "w") as File_:
-#                        File_.write(Json.dumps(Users, indent=1))
-#                        File_.close()
-
-#                    File.close()
-
-
-                Database.AddUserData(User=NewUser, PublicKey=None)
-                return render_template("UserSettings.html", Status="AccountDataChanged", Session=session)
-
-
-
-# The Value of Cryptocurrency
-@app.route("/priceChart", methods=["GET"])
-def priceChart():
-    if request.method == "GET":
-        RequestArguments = request.args
-        Date, Body = {}, {}
-
-        
-        if not "Day" in RequestArguments and not "Month" in RequestArguments and not "Year" in RequestArguments:
-            Body = {"TimeFrame": "Today", "Day": DateTime.date.today().day, "Month": DateTime.date.today().month, "Year": DateTime.date.today().year}
-        else:
-            Body = {"TimeFrame": RequestArguments.get("TimeFrame"), "Month": RequestArguments.get("Month") or None, "Year": RequestArguments.get("Year")}
-
-            if "Day" in RequestArguments:
-                Body["Day"] = RequestArguments.get("Day")
-
-        Date = Body
-        SearchTo = ""
-
-
-        Chart = Database.GetPriceChart(TimeFrame=Date["TimeFrame"], Date=Date)
-
-        Price = Chart["Price"]
-        TimeFrame = Date["TimeFrame"]
-        PriceChanged = Chart["Changed"]
-        PriceChange = Chart["Change"]
-        Volume = Chart["Volume"]
-        Bought = Chart["Bought"]
-        Sold = Chart["Sold"]
-
-
-        if TimeFrame == "Today":
-            SearchTo = "Hour"
-        
-        if TimeFrame == "Month" or TimeFrame == "Year":
-            SearchTo = "Day"
-
-
-        return render_template("PriceChart.html",
-        Price=Price,
-        TimeFrame=TimeFrame,
-        SearchTo=SearchTo,
-        Changed=PriceChanged,
-        PriceChange=Functions.RemoveUselessNums(str(PriceChange), 2),
-        Volume=Functions.RemoveUselessNums(str(Volume), 2),
-        Bought=Functions.RemoveUselessNums(str(Bought), 8),
-        Sold=Functions.RemoveUselessNums(str(Sold), 8),
-        Chart=Chart,
-        Top3BestInvestions=Chart["BestInvestions"],
-        Date=[DateTime.datetime.today().day,
-        DateTime.datetime.today().month,
-        DateTime.datetime.today().year],
-        Session=session)
-
-
-
-@app.route("/register", methods = ['GET', 'POST'])
-def register():
-    form = RegisterForm(request.form)
-
-
-    if request.method == 'POST':
-        Username = form.username.data
-        Name = form.name.data
-        Email = form.email.data
-        Password = form.password.data
-        CryptographyKeys = Security.GenerateKeys()
-
-
-        User = {"Username": Username,
-                "Name": Name,
-                "Avatar": "Default.png",
-                "Email": Email,
-                "Password": Security.Encode(Password, CryptographyKeys[0]),
-                "Balance": 3.00000000,
-                "WalletAddress": "0x" + Functions.WalletKey(),
-                "PrivateKey": CryptographyKeys[1],
-                "AccessToken": Functions.CreateAccessToken(CryptographyKeys[1]),
-                "Games": {},
-                "Stocks": {}}
-    
-        return Database.AddUserData(User, CryptographyKeys[0])
-
-    return render_template('Register.html', form=form, Session=session)
-
-
-
-@app.route("/login", methods = ['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        Username = request.form['username']
-        Password = request.form['password']
-
-
-        # 0: Username, 1: Name, 2: Avatar, 3: Email, 4: Password, 5: Balance, 6: WalletAddress, 7: PrivateKey, 8: AccessToken, 9: Games 10: Stocks
-        User = Database.GetUserData(Username=Username)
-        accPass = User[4]
-
-
-        # If the password cannot be found, the user does not exist
-        if accPass is None:
-            flash("Username didnt found", 'danger')
-            return redirect(url_for('login'))
-        else:
-            PublicKey = ""
-            
-
-            if not User[0] in Disk.PublicKeys:
-                File = open("static/UserData/PublicKeys.json", "r")
-                PublicKey = Json.loads(File.read())[Username]
-            else:
-                PublicKey = Disk.PublicKeys[User[0]]
-
-
-            if Security.Encode(Password, PublicKey) == accPass:
-                Login(Username)
-                Database.ChangeAccessToken(Name=Username)
-
-                return redirect(url_for("dashboard"))
-            else:
-                flash("Invalid password", 'danger')
-                return redirect(url_for('login'))
-
-
-    return render_template('Login.html', Session=session)
-
-
-
-# Transaction System
-@app.route("/transaction", methods = ['GET', 'POST'])
-@is_logged_in
-def transaction():
-    Form_ = TransactionForm(request.form)
-
-
-    if request.method == 'POST':
-        Wallet = Form_.wallet.data
-        Amount = Form_.amount.data
-
-        if Amount != "":
-            if Session["Balance"] < float(Amount):
-                flash("This amount isnt available in your wallet!", "danger")
-
-            elif Wallet == Session["WalletAddress"]:
-                flash("Invalid transaction.")
-
-            else:
-                Database.SendCryptos(Session["Username"], Wallet, float(Amount))
-
-                flash("Money Sent to {0}!".format(Wallet), "success")
-                Session["Balance"] = Session["Balance"] - float(Amount)
-
-                Time.sleep(3)
-                return redirect(url_for("dashboard"))
-
-            return redirect(url_for('transaction'))
-
-
-    return render_template('TransferPage.html', Balance=Session["Balance"], form=Form_, page='transaction', Session=session)
-
-
-
-#Buy more WalletCoins
-@app.route("/buy", methods = ['GET'])
-@is_logged_in
-def buy():
-    if request.method == "GET":
-        File = open("Price.json", "r")
-        Market = Json.loads(File.read())
-
-        return render_template('Buy.html', Balance=Session["Balance"], Session=Session, Price=Market["Price"], Market=Market["Market"])
-    
-
-    if request.method == "POST":
-        Data = request.get_json()
-
-        Database.SendCryptos("WalletCoinBANK", Session["WalletAddress"], float(Data["amount"]))
-        Database.ChangeCurrencyValue("Increased", Data["amount"], float(Data["amount"])) # amount: cash
-        Login(Session["Username"])
-
-        flash("{0} WalletCoins bought!".format(Data["amount"]))
-
-        Time.sleep(3)
-        flash("")
-        return redirect(url_for("dashboard"))
-
-
-
-@app.route("/sell", methods=["POST", "GET"])
-def sell():
-    return render_template('Sell.html', Balance=Session["Balance"], Session=session)
-
-
-
-# Dashboard page
-@app.route("/dashboard", methods = ["GET"])
-@is_logged_in
-def dashboard():
-    BalancePrice = Functions.CalculatePrice(float(Session["Balance"]), float(Database.GetPrice()))
-    BlockchainChain = Database.GetBlockchain()
-    BlocksList = []
-    RequestArguments = request.args
-    Pages = int(len(BlockchainChain) / 10)
-    CurrentPage : int = 0
-
-    
-    # Change page using blockchain's Paginator
-    if "page" in RequestArguments:
-        CurrentPage = int(RequestArguments["page"])
-
-        BlocksCounted = 0
-
-
-# My failed algorithm for pagination
-
-#        for block in blockchain:
-#            if blocksCounted == abs(currentPage * 10 + 10):
-#                blocksToRemove = abs(currentPage * 10 + 10)
-
-                # Remove the previous blocks from blocks list
-#                for bRemove in blocksList:
-#                    if blocksToRemove == 10:
-#                        break
-#                    else:
-#                        blocksList.remove(bRemove)
-#                        blocksToRemove = blocksToRemove - 1
-            
-#            else: # Append some blocks in list until you reach the blocks for this page
-#                blocksList.append(block)
-#                blocksCounted = blocksCounted + 1
-
-
-# My successful algorith for pagination
-
-        for Block_ in BlockchainChain:
-            if BlocksCounted >= abs(CurrentPage * 10 + 10) and BlocksCounted <= abs(CurrentPage * 10 + 20): # start
-                BlocksList.append(Block_)
-                BlocksCounted = BlocksCounted + 1
-
-            if BlocksCounted == abs(CurrentPage * 10 + 20): # end
-                break
-            
-            BlocksCounted = BlocksCounted + 1
-        
-        CurrentPage = CurrentPage
-    
-
-    else: # The first page
-        BlocksCounted = 0
-        for Block_ in BlockchainChain:
-            if BlocksCounted == 10:
-                break
-            else:
-                BlocksList.append(Block_)
-                BlocksCounted += 1
-
-    
-    Previous = CurrentPage - 1
-    if Previous < 0:
-        Previous = 0
-    
-    NextPage = CurrentPage + 1
-    if NextPage > Pages:
-        NextPage = Pages
-
-
-    return render_template('Blockchain.html',
-        Balance=Session["Balance"],
-        Price=BalancePrice,
-        WalletAddress=Session["WalletAddress"],
-        PrivateKey=Session["PrivateKey"],
-        AccessToken=Session["AccessToken"],
-        BlocksList=BlocksList,
-        Pages=Pages,
-        Previous=Previous,
-        Next=NextPage,
-        CurrentPage=CurrentPage,
-        Session=Session)
-
-
-
-# View block's data ( hash, transactions )
-@app.route("/block", methods = ["GET"])
-def block():
-    args = request.args
-    BlockNumber = int(args.get("number"))
-    FoundBlock = Database.GetBlock(BlockNumber)
-    ThisBlock = Database.GetBlockchainData(BlockNumber)
-    return render_template("Block.html",
-        Number=BlockNumber,
-        Nonce=ThisBlock["Nonce"],
-        Hash=ThisBlock["Hash"],
-        PreviousHash=ThisBlock["PreviousHash"],
-        BlockData=FoundBlock,
-        Session=session)
-
-
-
-# Create a new game
-@app.route("/createGame", methods=["POST", "GET"])
-def createGame():
-    Page = CreateGameForm(request.form)
-
-
-    if request.method == "POST":
-        AllGames = Database.GetAllGames()
-
-
-        if Page.gameName.data != "" and Page.stocksAmount.data != "":
-            if Page.gameName.data in AllGames:
-                flash("This game already exist!")
-                return render_template("CreateGame.html", form=Page)
-            
-
-            Database.CreateGame(Page.gameName.data, Page.promotion.data, int(Page.stocksAmount.data))
-            flash("Game Created !!!")
-
-        else:
-            flash("Please fill in the spaces !!!")
-
-
-    return render_template("CreateGame.html", form=Page, Session=session)
-
-
-
-# My Games Dashboard
-@app.route("/myGamesDashboard", methods=["GET"])
-def myGamesDashboard():
-    RequestArguments = request.args
-
-
-    if "Game" in RequestArguments:
-        DashboardAction = "Game"
-        Game = {}
-
-
-        if not RequestArguments.get("Game") in Disk.Games:
-            Game = Database.GetGameData(RequestArguments.get("Game"))
-        else:
-            Game = Disk.Games[RequestArguments.get("Game")]
-
-
-        # Load the game
-        MyGames = Session["Games"]
-        GamesStockHolder = {}
-    
-
-        for Game_ in MyGames:
-            for GameData in MyGames[Game_]:
-                if GameData == "StockHolder":
-                    if MyGames[Game_][GameData] == "True":
-                        GamesStockHolder[Game_] = Game_
-
-
-        return PrepareMyGame(MyGames_=MyGames, Game=Game, Action=DashboardAction, Null=False, RequestArguments=request.args)
-            
+        return jsonify({
+            "result": Chain.FindMyBlocks(CacheBlocks=Blockchain_, Wallet=Wallet)
+        }), 200
     else:
-        MyGames = Session["Games"]
+        Number = int(Params.get("number"))
 
-        GamesCounted = 0
-        for Game_ in MyGames:
-            if GamesCounted < 1:
-                Game = Database.GetGameData(Game_)
-                GamesCounted += 1
-            break
+        return jsonify({
+            "result": Chain.FindBlockByNumber(CacheBlocks=Blockchain_, Number=Number)
+        }), 200
 
 
-        if int(len(MyGames)) > 0: 
-            DashboardAction = "Idle"
-            GamesStockHolder = {}
+
+# W A L L E T = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+@CORE.route("/wallets/create", methods=["POST"])
+def WalletsCreate():
+    Payload = JSON.loads(request.get_data())
+    NewWallet_ = Wallet()
+    NewWallet = NewWallet_.CreateWallet(Phrase=Payload["Phrase"])
+
+    Wallets[NewWallet["Address"]] = NewWallet
+    PrivateKeys[NewWallet["PrivateKey"]] = NewWallet["Address"]
+
+    return jsonify({
+        "result": NewWallet
+    }), 200
+
+
+
+@CORE.route("/wallets/connect", methods=["POST"])
+def WalletsConnect():
+    Payload = JSON.loads(request.get_data())
+    PrivKey = Payload["PrivKey"]
+    Secret = Payload["Secret"]
+
+
+    # Fetch my wallet from database using my private key
+
+    if not PrivKey in PrivateKeys:
+        Wallet_ = Database.FindWallet(PrivateKey=PrivKey)
+
         
-
-            for Game_ in MyGames:
-                for GameData in MyGames[Game_]:
-                    if GameData == "StockHolder":
-                        if MyGames[Game_][GameData] == "True":
-                            GamesStockHolder[Game_] = Game_
-
-
-
-            return render_template("MyGamesDashboard.html",
-                Action="Idle",
-                MyGames=Session["Games"],
-                GamesStockHolder=GamesStockHolder,
-                Date=[
-                DateTime.datetime.today().day,
-                DateTime.datetime.today().month,
-                DateTime.datetime.today().year],
-                Session=session)
+        if len(Wallet_) == 0: # Not Found
+            return jsonify({}), 404
         else:
-            return PrepareMyGame({}, {}, "NoGames", True, request.args)
-
-
-
-@app.route("/games/explore/<string:type>", methods=["GET"])
-def exploreGame(type):
-    if request.method == "GET":
-        Type = type
-
-
-
-        # First of all, load my investings data - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-        MyGames = Session["Games"]
-
-        GamesCounted = 0
-        for Game_ in MyGames:
-            if GamesCounted < 1:
-                Game = Database.GetGameData(Game_)
-                GamesCounted += 1
-            break
-
-
-        if int(len(MyGames)) > 0: 
-            DashboardAction = "Idle"
-            GamesStockHolder = {}
-        
-
-            for Game_ in MyGames:
-                for GameData in MyGames[Game_]:
-                    if GameData == "StockHolder":
-                        if MyGames[Game_][GameData] == "True":
-                            GamesStockHolder[Game_] = Game_
-
-
-
-        # Now load the games - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-        if Type == "MostValued":
-            Games = Database.GetAllGames()
-            MostValuedGamesDict = {
-                "Section1": {},
-                "Section2": {},
-                "Section3": {},
-                "Section4": {}
-            }
-            MostValuedGames = []
-            MostValuedGamesNames = []
-            CurrentSection = 4
-
-
-            while len(MostValuedGames) < 16:
-                MostValuedGame = 0
-
-
-                for Game in Games:
-                    GameAlreadyAdded = False
-
-
-                    if Game in MostValuedGamesNames:
-                        GameAlreadyAdded = True
-                        continue
-
-                    
-                    if not GameAlreadyAdded:
-                        if Games[Game]["Value"] > MostValuedGame:
-                            MostValuedGame = Games[Game]["Value"]
-                
-
-                for  Game in Games:
-                    if Games[Game]["Value"] == MostValuedGame and not Game in MostValuedGamesNames:
-                        GameDict = {"Name": Game, "IconPath": "Default.jpg", "Value": Games[Game]["Value"]}
-                        MostValuedGames.append(GameDict)
-            
-
-            for Game in range(0, len(MostValuedGames) - 1):
-                if len(MostValuedGamesDict["Section" + str(CurrentSection)]) < 4:
-                    MostValuedGamesDict["Section" + CurrentSection][MostValuedGames[Game]["Name"]] = MostValuedGames[Game]
-                else:
-                    CurrentSection -= 1
-                    MostValuedGamesDict["Section" + CurrentSection][MostValuedGames[Game]["Name"]] = MostValuedGames[Game]
-            
-
-            return render_template("MyGamesDashboard.html",
-                Action="Explore",
-                Results=MostValuedGamesDict,
-                MyGames=Session["Games"],
-                GamesStockHolder=GamesStockHolder,
-                Date=[
-                DateTime.datetime.today().day,
-                DateTime.datetime.today().month,
-                DateTime.datetime.today().year],
-                Session=session)
-        
-
-
-        if Type == "Trend":
-            pass
-
-
-
-@app.route("/gameCreator", methods=["GET"])
-def gameCreator():
-    if request.method == "GET":
-        User : list
-        
-
-        if request.args.get("Creator") in Disk.Users["Users"]:
-            User = Disk.Users["Users"][request.args.get("Creator")]
-        else:
-            User = Database.GetUserData(request.args.get("Creator"))
-        
-        
-        Games = User[7]
-        GamesFound : list = []
-
-
-        GamesCounted = 0
-        for Game in Games:
-            if GamesCounted == 3:
-                break
-            
-            GamesFound.append(Game)
-            GamesCounted += 1
-
-        return render_template("MyGamesDashboard.html", Action="GameCreatorPage", CreatorName=User[0], Games=GamesFound, Session=session)
-
-
-
-@app.route("/searchGame", methods=["POST"])
-def searchGame():
-    if request.method == "POST":
-        SearchGame = request.form["game"]
-        Games = Database.GetAllGames()
-        FoundGames = []
-
-        MyGames = Session["Games"]
-        GamesStockHolder = {}
-
-
-        for Game in Games:
-            if Game.startswith(SearchGame):
-                FoundGames.append(Game)
-        
-
-        for Game_ in MyGames:
-            for GameData in MyGames[Game_]:
-                if GameData == "StockHolder":
-                    if MyGames[Game_][GameData] == "True":
-                        GamesStockHolder[Game_] = Game_
-        
-
-        return render_template("myGamesDashboard.html",
-        Action="Search",
-        Searched=SearchGame,
-        FoundGames=FoundGames,
-        MyGames=Session["Games"],
-        GamesStockHolder=GamesStockHolder,
-        Date=[DateTime.datetime.day,
-        DateTime.datetime.month,
-        DateTime.datetime.year],
-        Session=session)
-
-
-
-@app.route("/gameSettings", methods=["POST", "GET"])
-def gameSettings():
-    if request.method == "GET":
-        RequestArguments = request.args
-
-        return render_template("myGamesDashboard.html",
-        Action="Settings",
-        Game=RequestArguments.get("Game"),
-        MyGames=Session["Games"],
-        Date=[DateTime.datetime.day,
-        DateTime.datetime.month,
-        DateTime.datetime.year],
-        Session=session)
-    
-
-    if request.method == "POST":
-        RequestArguments = request.args
-
-        NewName = request.form["GameName"]
-        NewDescription = request.form["GameDescription"]
-
-
-        if not "UploadImage" in request.files:
-            Database.GameSettings(PreviousGame=RequestArguments.get("Game"), Name=NewName, Description=NewDescription, Image_=None)
-        else:
-            Database.GameSettings(PreviousGame=RequestArguments.get("Game"), Name=NewName, Description=NewDescription, Image_=request.files["UploadImage"])
-        
-        flash("Game data changed !!!")
-
-        
-        Time.sleep(3)
-        return redirect(url_for(f"myGamesDashboard"))
-
-
-
-def PrepareMyGame(MyGames_ : dict, Game : dict, Action : str, Null : bool, RequestArguments):
-    if not Null:
-        MyGames = MyGames_
-        GamesStockHolder = {}
-        Stats = {}
-        SearchTo = ""
-        StockValue = Game["Value"] / Game["Stocks"]["Total"]
-        StocksOwned = Game["Stocks"]["Owned"]
-        StockValueWLLC = Functions.CalculateStockPrice(int(StocksOwned), float(Game["Value"]))
-        StockValueEUR = Functions.CalculatePrice(StockValueWLLC, Database.GetPrice())
-        Date, Body = {}, {}
-
-
-        if not "Day" in RequestArguments and not "Month" in RequestArguments and not "Year" in RequestArguments:
-            Body = {"TimeFrame": "Today", "Day": DateTime.date.today().day, "Month": DateTime.date.today().month, "Year": DateTime.date.today().year}
-            SearchTo = "Hour"
-    
-        else:
-            Body = {"TimeFrame": RequestArguments.get("TimeFrame"), "Month": RequestArguments.get("Month") or None, "Year": RequestArguments.get("Year")}
-
-            if "Day" in RequestArguments: Body["Day"] = RequestArguments.get("Day")
-            if RequestArguments.get("TimeFrame") == "Today": SearchTo = "Hour"
-            if RequestArguments.get("TimeFrame") == "Month" or RequestArguments.get("TimeFrame") == "Year": SearchTo = "Day"
-
-        Date = Body
-
-
-
-        if "Game" in RequestArguments:
-            Stats = Database.GetStockPriceChart(RequestArguments.get("Game"), Body["TimeFrame"], Date)
-        else:
-            GamesCounted = 0
-            for Game_ in MyGames:
-                if GamesCounted < 1:
-                    Stats = Database.GetStockPriceChart(Game_, Body["TimeFrame"], Date)
-                    GamesCounted += 1
-                break
-
-
-
-        for Game_ in MyGames:
-            for GameData in MyGames[Game_]:
-                if GameData == "StockHolder":
-                    if MyGames[Game_][GameData] == "True":
-                        GamesStockHolder[Game_] = Game_
-
-
-        return render_template("MyGamesDashboard.html",
-        Action=Action, Game=RequestArguments.get("Game"),
-        SearchTo=SearchTo,
-        GameCreator=Game["Creator"],
-        Playings = Game["Playings"],
-        StockValue=Functions.RemoveUselessNums(str(StockValue), 8),
-        StockEUR=Functions.RemoveUselessNums(str(StockValueEUR), 2),
-        MyGames=MyGames_,
-        GamesStockHolder=GamesStockHolder,
-        Volume=Stats["Volume"],
-        Bought=Functions.RemoveUselessNums(str(Stats["Bought"]), 8),
-        Sold=Functions.RemoveUselessNums(str(Stats["Sold"]), 8),
-        Change=Functions.RemoveUselessNums(str(Stats["Change"]), 2),
-        Changed=Stats["Changed"],
-        Chart=Stats["Stats"],
-        Date=[DateTime.datetime.today().day,
-        DateTime.datetime.today().month,
-        DateTime.datetime.today().year],
-        Session=session)
-    
+            if Wallet_["SecretPhrase"] == Secret:
+
+
+                return jsonify({
+                    "result": {
+                        "PublicKey": Wallet_["PublicKey"],
+                        "PrivateKey": PrivKey,
+                        "SecretPhrase": Wallet_["SecretPhrase"],
+                        "API_KEY": Wallet_["API_KEY"],
+                        "Address": Wallet_["Address"],
+                        "Balance": Wallet_["Balance"]
+                    }
+                }), 200
+            else:
+                return jsonify({}), 403
     else:
-        return render_template("MyGamesDashboard.html",
-        Action="Idle",
-        Game="",
-        SearchTo="",
-        GameCreator="",
-        Playings=0,
-        StockValue=0.0,
-        StockEUR=0.00,
-        MyGames=[],
-        GamesStockHolder=[],
-        Volume=0.0,
-        Bought=0.0, Sold=0.0,
-        Change=0.0,
-        Changed="",
-        Chart=[], Date=[
-        DateTime.datetime.today().day,
-        DateTime.datetime.today().month,
-        DateTime.datetime.today().year],
-        Session=session)
+        if Wallets[PrivateKeys[PrivKey]]["SecretPhrase"] == Secret:
+            Wallet_ = Wallets[PrivateKeys[PrivKey]]
+
+
+            return jsonify({
+                    "result": {
+                        "PublicKey": Wallet_["PublicKey"],
+                        "PrivateKey": PrivKey,
+                        "SecretPhrase": Wallet_["SecretPhrase"],
+                        "API_KEY": Wallet_["API_KEY"],
+                        "Address": Wallet_["Address"],
+                        "Balance": Wallet_["Balance"]
+                    }
+                }), 200
+        else:
+            return jsonify({}), 403
 
 
 
-# Buy some stocks
-@app.route("/buyStocks", methods=["POST", "GET"])
-def buyStocks():
-    form = BuyStocksForm(request.form)
+@CORE.route("/wallets/get", methods=["POST"])
+def WalletsGet():
+    Payload = JSON.loads(request.get_data())
+    PrivKey = Payload["PrivKey"]
 
-    if request.method == "GET":
-        RequestArguments = request.args
-        MyGames = Session["Games"]
-        Game = {}
+
+    # Fetch my wallet from database using my private key
+
+    if not PrivKey in PrivateKeys:
+        Wallet_ = Database.FindWallet(PrivateKey=PrivKey)
+
+
+        if len(Wallet_) == 0:
+            return jsonify({}), 404
+        else:
+            return jsonify({
+                "result": Wallet_
+            }), 200
+    
+
+    Address = PrivateKeys[PrivKey]
+    return jsonify({
+        "result": Wallets[Address]
+    }), 200
+
+
+
+@CORE.route("/wallets/delete", methods=["POST"])
+def WalletsDelete():
+    Payload = JSON.loads(request.get_data())
+    PrivKey = Payload["PrivKey"]
+    Secret = Payload["Secret"]
+
+
+    # Fetch my wallet from database using my private key
+
+    if not PrivKey in PrivateKeys:
+        Wallet_ = Database.FindWallet(PrivateKey=PrivKey)
 
         
-        if RequestArguments.get("Game") in Disk.Games:
-            Game = Disk.Games[RequestArguments.get("Game")]
+        if len(Wallet_) == 0: # Not Found
+            return jsonify({}), 404
         else:
-            Game = Database.GetGameData(RequestArguments.get("Game"))
-
-
-        return PrepareMyGame(MyGames_=MyGames, Game=Game, Action="BuyStocks", Null=False, RequestArguments=RequestArguments)
-
-
-    if request.method == "POST":
-        RequestArguments = request.args
-        MyGames = Session["Games"]
-        Game = {}
-
-
-        if RequestArguments.get("Game") in Disk.Games:
-            Game = Disk.Games[RequestArguments.get("Game")]
+            if Wallet_["SecretPhrase"] == Secret:
+                DeletedWallets.append(Wallet_["Address"])
+                DeletedPrivateKeys.append(PrivKey)
+                return jsonify({}), 200
+            else:
+                return jsonify({}), 403
+    else:
+        if Wallets[PrivateKeys[PrivKey]]["SecretPhrase"] == Secret:
+            DeletedWallets.append(Wallet_["Address"])
+            DeletedPrivateKeys.append(PrivKey)
+            return jsonify({}), 200
         else:
-            Game = Database.GetGameData(RequestArguments.get("Game"))
+            return jsonify({}), 403
 
 
-        GameValue = Game["Value"]
-        StocksAmount = Game["Stocks"]["Total"]
-        AmountToPay = Functions.CalculateStockPrice(StocksAmount, GameValue) * int(form.amount.data)
+
+@CORE.route("/wallets/transaction", methods=["POST"])
+def WalletsTransaction():
+    Payload = JSON.loads(request.get_data())
+    PrivKey = Payload["PrivKey"]
+    Recipient = Payload["Recipient"]
+    Amount = Payload["Amount"]
+    SenderAddress = ""
 
 
-        if Game["Stocks"]["ForSell"] <= int(form.amount.data):
-            flash("This amount isnt available for purchace.")
-            return PrepareMyGame(MyGames_=MyGames, Game=Game, Action="BuyStocks", Null=False, RequestArguments=RequestArguments)
+    # Fetch my wallet from database using my private key
+
+    if not PrivKey in PrivateKeys:
+        Wallet_ = Database.FindWallet(PrivateKey=PrivKey)
+
         
-        elif Session["Balance"] <= AmountToPay:
-            flash("This amount isnt available in your wallet.")
-            return PrepareMyGame(MyGames_=MyGames, Game=Game, Action="BuyStocks", Null=False, RequestArguments=RequestArguments)
+        if len(Wallet_) == 0: # Not Found
+            return jsonify({}), 404
+        else:
+            # Check sender's balance amount
+
+            AmountWithFees = (Amount * Fees_Transcate) / 100.0
+            AmountFees = Amount + AmountWithFees
+
+
+            if AmountFees > Wallet_["Balance"]:
+                return jsonify({
+                    "result": "Insufficient wallet balance."
+                }), 500
+
+
+            # Wallet connected, save temponary the credentials in cache memony
+
+            SenderAddress = Wallet_["Address"]
+            PrivateKeys[PrivKey] = Wallet_["Address"]
+            Wallets[SenderAddress] = Wallet_
+    else:
+        SenderAddress = PrivateKeys[PrivKey]
+
+    # Check sender's balance amount
+
+    AmountWithFees = (Amount * Fees_Transcate) / 100.0
+    AmountFees = Amount + AmountWithFees
+
+
+    if AmountFees > Wallets[SenderAddress]["Balance"]:
+        return jsonify({
+            "result": "Insufficient wallet balance."
+        }), 402
+    
+
+    # Fetch recipient's wallet from database using its receiving address
+
+    if not Recipient in Wallets:
+        KeyFound = False
+        Key = ""
+
+
+        for Priv in PrivateKeys:
+            if PrivateKeys[Priv] == Recipient:
+                KeyFound = True
+                Key = Priv
         
+
+        if KeyFound == False:
+            Key = Database.FindPrivKey(Recipient)
+            KeyFound = True
+
+
+        if not KeyFound:
+            return jsonify({}), 404
         else:
-            Database.BuyStocks(RequestArguments.get("Game"), int(form.amount.data), float(AmountToPay))
-            flash("Stocks Bought !!!")
+            Wallet_ = Database.FindWallet(PrivateKey=Key)
 
-            Login(Session["username"])
-            return PrepareMyGame(MyGames_=MyGames, Game=Game, Action="BuyStocks", Null=False, RequestArguments=RequestArguments)
-
-
-
-# Sell stocks
-@app.route("/sellStocks", methods=["POST", "GET"])
-def sellStocks():
-    form = SellStocksForm(request.form)
-
-    if request.method == "GET":
-        RequestArguments = request.args
-        MyGames = Session["Games"]
-        Game = {}
+            if len(Wallet_) > 0:
+                PrivateKeys[Key] = Wallet_["Address"]
+                Wallets[Wallet_["Address"]] = Wallet_
+            else:
+                return jsonify({}), 404
 
 
-        if RequestArguments.get("Game") in Disk.Games:
-            Game = Disk.Games[RequestArguments.get("Game")]
-        else:
-            Game = Database.GetGameData(RequestArguments.get("Game"))
+    # Transcate the money
+
+    Wallets[Recipient]["Balance"] += Amount
+    Wallets[SenderAddress]["Balance"] -= AmountFees
+
+    global Earnings
 
 
-        return PrepareMyGame(MyGames_=MyGames, Game=Game, Action="SellStocks", Null=False, RequestArguments=RequestArguments)
+    # Save previous month company earnings first
+
+    if DateTime.datetime.today().day == 1:
+        if not Database.CompanyLastPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month):
+            Payout()
+
+
+            if DateTime.datetime.today().month -1 > 0:
+                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month -1, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
+            else:
+                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year -1, Month=12, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
+
+
+            Earnings["WLLC"] = 0
+            Earnings["EUR"] = 0
     
+
+    Earnings["WLLC"] += AmountWithFees
+
     
-    if request.method == "POST":
-        RequestArguments = request.args
-        MyGames = Session["Games"]
-        MyStocks = Session["Stocks"]
-        Game = {}
+    # Validate blockchain and append the new block
+
+    global Blockchain_
+    Transaction_ = Transaction(CacheBlocks=Blockchain_, Sender=SenderAddress, Recipient=Recipient, Amount=Amount)
+    Blockchain_ = Blockchain_ + Transaction_.GetChain()
 
 
-        if RequestArguments.get("Game") in Disk.Games:
-            Game = Disk.Games[RequestArguments.get("Game")]
-        else:
-            Game = Database.GetGameData(RequestArguments.get("Game"))
+    return jsonify({
+        "result": {
+            "Amount": Wallets[SenderAddress]["Balance"]
+        }
+    }), 200
 
 
-        if MyStocks[RequestArguments.get("Game")] < int(form.amount.data):            
-            flash("This amount isnt available in your stocks wallet")
-            return PrepareMyGame(MyGames_=MyGames, Game=Game, Action="SellStocks", Null=False, RequestArguments=RequestArguments)
+
+@CORE.route("/wallets/buy", methods=["POST"])
+def WalletsBuy():
+    Payload = JSON.loads(request.get_data())
+    PrivKey = Payload["PrivKey"]
+    Amount = Payload["Amount"]
+    Address = ""
+
+
+    # Fetch my wallet from database using my private key
+
+    if not PrivKey in PrivateKeys:
+        Wallet_ = Database.FindWallet(PrivateKey=PrivKey)
+
         
+        if len(Wallet_) == 0: # Not Found
+            return jsonify({}), 404
         else:
-            Session["Stocks"] = MyStocks
-            Database.SellStocks(RequestArguments.get("Game"), int(form.amount.data))
+            # Wallet connected, save temponary the credentials in cache memony
 
-
-            if not Session["Username"] in Disk.Users["Users"]:
-                NewUser = {"Username": Session["Username"],
-                        "Name": Session["Name"],
-                        "Avatar": Session["Avatar"],
-                        "Email": Session["Email"],
-                        "Password": Session["Password"],
-                        "Balance": Session["Balance"],
-                        "WalletAddress": Session["WalletAddress"],
-                        "PrivateKey": Session["PrivateKey"],
-                        "AccessToken": Session["AccessToken"],
-                        "Games": Session["Games"],
-                        "Stocks": Session["Stocks"]}
-                
-            Disk.Users["Users"][Session["username"]]["Stocks"] = Session["Stocks"]
-
-            flash("{0} Stocks Sold !!!".format(str(form.amount.data)))
-            return PrepareMyGame(MyGames_=MyGames, Game=Game, Action="SellStocks", Null=False, RequestArguments=RequestArguments)
-
-
-
-@app.route("/issueStocks", methods=["POST", "GET"])
-def issueStocks():
-    if request.method == "GET":
-        RequestArguments = request.args
-        MyGame = Session["Games"]
-        Game = {}
-
-
-        if RequestArguments.get("Game") in Disk.Games:
-            Game = Disk.Games[RequestArguments.get("Game")]
-        else:
-            Game = Database.GetGameData(RequestArguments.get("Game"))
-
-
-        return PrepareMyGame(MyGames_=MyGame, Game=Game, Action="IssueStocks", Null=False, RequestArguments=RequestArguments)
+            Address = Wallet_["Address"]
+            PrivateKeys[PrivKey] = Address
+            Wallets[Address] = Wallet_
+    else:
+        Address = PrivateKeys[PrivKey]
     
+
+    # Add more WalletCoins on this wallet
+
+    Fee = (Amount * Fees_Buy) / 100.0
+    AmountEUR = PriceNow * (Amount - Fee)
+
+    Wallets[Address]["Balance"] += Amount - Fee
+    Vault["Cash"] += AmountEUR
+
+
+    global Earnings
+
+
+    # Save previous month company earnings first
+
+    if DateTime.datetime.today().day == 1:
+        if not Database.CompanyLastPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month):
+            Payout()
+
+
+            if DateTime.datetime.today().month -1 > 0:
+                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month -1, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
+            else:
+                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year -1, Month=12, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
+
+
+            Earnings["WLLC"] = 0
+            Earnings["EUR"] = 0
     
-    if request.method == "POST":
-        RequestArguments = request.args
-        MyGame = Session["Games"]
-        Game = {}
+
+    Earnings["WLLC"] += Fee
 
 
-        if RequestArguments.get("Game") in Disk.Games:
-            Game = Disk.Games[RequestArguments.get("Game")]
+    # There are no coins in stock, issue more
+
+    if Vault["Supply"] - Vault["Owned"] < Amount:
+        NewAmount = Amount + 1000
+        Vault["Supply"] += NewAmount
+    
+
+    # Increase the owned coins by the purchased amount of coins
+
+    Vault["Owned"] += Amount
+
+
+    # Increase the value of WalletCoin
+
+    ChangePrice(Action="Increase", Amount=AmountEUR)
+
+
+    return jsonify({
+        "result": {
+            "Balance": Wallets[Address]["Balance"]
+        }
+    }), 200
+
+
+
+@CORE.route("/wallets/sell", methods=["POST"])
+def WalletsSell():
+    Payload = JSON.loads(request.get_data())
+    PrivKey = Payload["PrivKey"]
+    Amount = Payload["Amount"]
+    Address = ""
+
+
+    # Fetch my wallet from database using my private key
+
+    if not PrivKey in PrivateKeys:
+        Wallet_ = Database.FindWallet(PrivateKey=PrivKey)
+
+        
+        if len(Wallet_) == 0: # Not Found
+            return jsonify({}), 404
         else:
-            Game = Database.GetGameData(RequestArguments.get("Game"))
+            # Wallet connected, save the credentials in cache memony temponary 
 
-
-        Database.IssueNewStocks(InGame=RequestArguments.get("Game"), Amount=int(request.form["amount"]))
-
-
-        flash("{0} new Stocks released !!!".format(str(request.form["amount"])))
-        return PrepareMyGame(MyGames_=MyGame, Game=Game, Action="IssueStocks", Null=False, RequestArguments=RequestArguments)
-
-
-
-@app.route("/About")
-def about():
-    return render_template("About.html", Session=session)
-
-
-@app.route("/FAQ")
-def FAQ():
-    return render_template("FAQ.html", Session=session)
-
-
-@app.route("/RESTfulApi")
-def restFulApi():
-    return render_template("RestApi.html", Session=session)
-
-
-@app.route("/helpCenter")
-def helpCenter():
-    return render_template("HelpCenter.html", Session=session)
-
-
-@app.route("/reportProblem", methods=["POST"])
-def reportProblem():
-    if request.method == "POST":
-        Email = request.form["email"]
-        Text = request.form["message"]
-
-
-        Sender = "netsgamedev@gmail.com"
-        Admin = "walletcoinofficial2021@gmail.com"
-        Message = """
-            Hey WalletCoin Admin,
-
-            Someone reported a problem in WalletCoin. The sender is {0}.
-            Message:
+            if Wallet_["Balance"] < Amount:
+                return jsonify({}), 402 # Insufficient Balance
             
-            {1}
-        """.format(Email, Text)
+
+            Address = Wallet_["Address"]
+            PrivateKeys[PrivKey] = Address
+            Wallets[Address] = Wallet_
+    else:
+        Address = PrivateKeys[PrivKey]
+
+        if Wallets[Address]["Balance"] < Amount:
+            return jsonify({}), 402 # Insufficient Balance
+    
+
+    AmountEUR = PriceNow * Amount
+
+    Wallets[Address]["Balance"] -= Amount
+    Vault["Cash"] -= AmountEUR
+    Vault["Owned"] -= Amount
 
 
-        with SMTP.SMTP("smtp.gmail.com", 587) as Server:
-            Server.starttls()
-            Server.login(Sender, "gamedev.com")
-            Server.sendmail(Sender, Admin, Message)
+    # Sell fees is 0,5%, so user loses 0,5% of the cash he received
+
+    global Earnings
+
+
+    # Save previous month company earnings first
+
+    if DateTime.datetime.today().day == 1:
+        if not Database.CompanyLastPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month):
+            Payout()
+
+
+            if DateTime.datetime.today().month -1 > 0:
+                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month -1, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
+            else:
+                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year -1, Month=12, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
+
+
+            Earnings["WLLC"] = 0
+            Earnings["EUR"] = 0
+    
+
+    Earnings["EUR"] += ((AmountEUR * Fees_Sell) / 100.0)
+
+
+    # Decrease the value of WalletCoin
+
+    ChangePrice(Action="Decrease", Amount=AmountEUR)
+
+
+    return jsonify({
+        "result": {
+            "Balance": Wallets[Address]["Balance"]
+        }
+    }), 200
+
+
+
+# P A Y O U T S = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+@CORE.route("/payouts/create", methods=["POST"])
+def CreatePayout():
+    Payload = JSON.loads(request.get_data())
+    Id = Payload["Id"]
+    Wallet = Payload["Wallet"]
+
+
+    if not Wallet in Payouts:
+        Payouts[Wallet] = []
+    
+
+    Payouts[Wallet].append({
+        "Id": Id,
+        "Wallet": Wallet,
+        "Amount": Payload["Amount"],
+        "Date": {
+            "Year": DateTime.datetime.today().year,
+            "Month": DateTime.datetime.today().minute,
+            "Day": DateTime.datetime.today().day,
+            "Hour": DateTime.datetime.today().hour,
+            "Minute": DateTime.datetime.today().minute,
+            "Second": DateTime.datetime.today().second
+        }
+    })
+
+    return jsonify({
+        "result": Payouts[Wallet][Id]
+    }), 200
+
+
+
+@CORE.route("/payouts/<string:Wallet>", methods=["GET"])
+def GetPayouts(Wallet):
+    WalletPayouts = []
+
+
+    if Wallet in Payouts:
+        WalletPayouts = Payouts[Wallet]
+    
+
+    Payouts_ = Database.FindWalletPayouts(Address=Wallet)
+
+
+    if len(Payouts_) > 0:
+        WalletPayouts = Payouts_ + WalletPayouts
+
+
+        return jsonify({
+            "result": WalletPayouts
+        }), 200
+    
+    
+    return jsonify({
+        "result": []
+    }), 200
+
+
+
+@CORE.route("/payouts/<string:Wallet>/<string:Id>", methods=["GET"])
+def GetPayout(Wallet, Id):
+    if Wallet in Payouts:
+        for I in range(0, len(Payouts[Wallet])):
+            if Payouts[Wallet][I]["Id"] == Id:
+                return jsonify({
+                    "result": Payouts[Wallet][I]
+                }), 200
+    
+
+    Payout = Database.FindWalletPayout(Address=Wallet, Id=Id)
+
+
+    if len(Payout) > 0:
+        return jsonify({
+            "result": Payout
+        }), 200
+    
+    
+    return jsonify({
+        "result": []
+    }), 200
+
+
+
+@CORE.route("/payouts/<string:Wallet>/last", methods=["GET"])
+def GetLastPayout(Wallet):
+    if Wallet in Payouts:
+        return jsonify({
+            "result": Payouts[Wallet][len(Payouts[Wallet]) -1]
+        }), 200
+    
+
+    Payouts_ = Database.FindWalletPayouts(Address=Wallet)
+
+
+    if len(Payouts_) > 0:
+        return jsonify({
+            "result": Payouts_[len(Payouts_) -1]
+        }), 200
+    
+    
+    return jsonify({
+        "result": []
+    }), 200
+
+
+
+# A P I K E Y S = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+@CORE.route("/wallets/validateApiKey", methods=["POST"])
+def ValidateApiKey():
+    Payload = JSON.loads(request.get_data())
+    Wallet = Payload["Wallet"]
+    ApiKey = Payload["Key"]
+
+
+    # Find private key
+
+    PrivKey = ""
+
+    if not Wallet in Wallets:
+        Key = Database.FindPrivKey(Wallet=Wallet)
+
         
-
-        flash("Message was sent!")
-
-        Time.sleep(3)
-        flash("")
-
-
-        return redirect(url_for("dashboard"))
-
-
-
-# # # # Create the restful api # # # #
-
-
-@app.route("/api/price/", methods=["GET"])
-def Price():
-    if request.method == "GET":
-        Price = Database.GetPrice()
-        return jsonify({"result": "%s EUR" % Price})
-
-
-
-@app.route("/api/price/change/", methods=["POST"])
-def PriceChange():
-    if request.method == "POST":
-        RequestArguments = request.args
-
-
-        if "bought" in RequestArguments:
-            Database.ChangeCurrencyValue("Increased", float(RequestArguments.get("amount")) * Database.GetPrice(), RequestArguments.get("amount"))
-        
-        if "sold" in RequestArguments:
-            Database.ChangeCurrencyValue("Decreased", float(RequestArguments.get("amount")) * Database.GetPrice(), RequestArguments.get("amount"))
-
-
-
-@app.route("/api/price/chart/", methods=["GET"])
-def PriceChart():
-    if request.method == "GET":
-        RequestArguments = request.args
-        Date = {}
-
-
-        if not "TimeFrame" in RequestArguments:
-            return jsonify({"result": {"error": "TimeFrame argument is missing!"}})
-        
-        TimeFrame = RequestArguments.get("TimeFrame")
-
-        
-        if not "Day" in RequestArguments and not "Month" in RequestArguments and not "Year" in RequestArguments:
-            Date = {"TimeFrame": "Today", "Day": DateTime.date.today().day, "Month": DateTime.date.today().month, \
-                "Year": DateTime.date.today().year}
+        if Key != "":
+            PrivKey = Key
         else:
-            Date = {"TimeFrame": RequestArguments.get("TimeFrame"), "Month": RequestArguments.get("Month") or None, \
-                "Year": RequestArguments.get("Year")}
-
-            if "Day" in RequestArguments:
-                Date["Day"] = RequestArguments.get("Day")
-
-
-        return jsonify({"result": Database.GetPriceChart(
-                TimeFrame=TimeFrame, Date=Date)
+            return jsonify({
+                "result": {
+                    "message": "Private key not found.",
+                    "statusCode": 404
                 }
-            )
+            }), 404
+    else:
+        PrivKey = Wallets[Wallet]["PrivateKey"]
 
 
+    # Fetch my wallet from database using my private key
 
-@app.route("/api/auth/", methods=["GET"])
-def ApiAuth():
-    if request.method == "GET":
-        RequestArguments = request.args
+    if not PrivKey in PrivateKeys:
+        Wallet_ = Database.FindWallet(PrivateKey=PrivKey)
 
-
-        if not "AccessToken" in RequestArguments:
-            return jsonify({"result": {"error": "AccessToken argument doesnt exist!"}})
-
-        AccessToken = RequestArguments.get("AccessToken")
-
-
-        Account = Database.LoginWithAccessToken(AccessToken=AccessToken)
-
-
-        if Account == "User didnt found!":
-            return jsonify({"result": {"error": "This account doesnt exist"}})
-        else:
-            return jsonify({"result": {"Username": Account[0], "Balance": Account[1], "WalletAddress": Account[2]}})
-
-
-
-@app.route("/api/wallet/create/", methods=["POST"])
-def CreateWallet():
-    if request.method == "POST":
-        RequestArguments = request.args
-        Keys = Security.GenerateKeys()
-
-
-        if not "Pass" in RequestArguments:
-            return jsonify({"result": {"error": "Please define a password"}})
         
-        Password = RequestArguments.get("Pass")
-        Wallet = "0x" + Functions.CreateRandomKey(30)
+        if len(Wallet_) == 0: # Not Found
+            return jsonify({
+                "result": {
+                    "message": "Wallet not found.",
+                    "statusCode": 404
+                }
+            }), 404
+        else:
+            if Wallet_["API_KEY"] == ApiKey:
+                return jsonify({}), 200
+            else:
+                return jsonify({
+                    "result": {
+                        "message": "Invalid API key.",
+                        "statusCode": 403
+                    }
+                }), 403
+    else:
+        if Wallets[PrivateKeys[PrivKey]]["API_KEY"] == ApiKey:
+            return jsonify({}), 200
+        else:
+            return jsonify({
+                "result": {
+                    "message": "Invalid API key.",
+                    "statusCode": 403
+                }
+            }), 403
 
 
-        NewWallet = {
-            "Balance": 0.0,
-            "Password": Password,
-            "PrivateKey": Keys[1],
-            "AccessToken": Functions.CreateAccessToken(Keys[1])
+
+# A C C E P T P A Y M E N T S = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+@CORE.route("/wallets/invoices/create", methods=["POST"])
+def InvoicesCreate():
+    Payload = JSON.loads(request.get_data())
+    PrivKey = Payload["PrivKey"]
+    Description = Payload["Description"]
+    Amount = Payload["Amount"]
+    SuccessUrl = Payload["Urls"]["Success"]
+    FailedUrl = Payload["Urls"]["Failed"]
+    CancelUrl = Payload["Urls"]["Cancel"]
+
+
+    # Fetch my wallet from database using my private key
+
+    Address = ""
+
+
+    if not PrivKey in PrivateKeys:
+        Wallet_ = Database.FindWallet(PrivateKey=PrivKey)
+
+        
+        if len(Wallet_) == 0: # Not Found
+            return jsonify({}), 404
+        else:
+            Address = Wallet_["Address"]
+    else:
+        Address = PrivateKeys[PrivKey]
+    
+
+    # Create the new invoice
+
+    Crypto = Cryptography()
+    InvoiceId = Crypto.GenerateRandomKey(Count=20, RemoveSelected=False)
+    Invoice = {
+        "Id": InvoiceId,
+        "Description": Description,
+        "Amount": Amount,
+        "Urls": {
+            "Success": SuccessUrl,
+            "Failed": FailedUrl,
+            "Cancel": CancelUrl
+        }
+    }
+
+    if not Address in ApiInvoices:
+        ApiInvoices[Address] = {}
+    
+    ApiInvoices[Address][InvoiceId] = Invoice
+
+    return jsonify({
+        "result": {
+            "invoice": InvoiceId,
+            "payment_url": WebsiteDomain + "/payments?invoice=%s&seller=%s" % (InvoiceId, Address)
+        }
+    }), 200
+
+
+
+@CORE.route("/wallets/invoices/execute", methods=["POST"])
+def InvoicesExecute():
+    Payload = JSON.loads(request.get_data())
+    SellerAddress = Payload["Seller"]
+    PayerPrivateKey = Payload["PayerPrivateKey"]
+    PayerSecretPhrase = Payload["PayerSecretPhrase"]
+    InvoiceId = Payload["InvoiceId"]
+
+
+    # Fetch seller wallet from database using seller private key
+
+    SellerKeyFound = False
+    SellerPrivateKey = ""
+
+
+    for Priv in PrivateKeys:
+        if PrivateKeys[Priv] == SellerAddress:
+            SellerPrivateKey = Priv
+            SellerKeyFound = True
+    
+
+    if SellerKeyFound == False:
+        Key = Database.FindPrivKey(Wallet=SellerAddress)
+
+        if Key == "":
+            return jsonify({}), 404
+        else:
+            SellerPrivateKey = Key
+
+
+    Address = ""
+
+
+    if not SellerPrivateKey in PrivateKeys:
+        Wallet_ = Database.FindWallet(PrivateKey=SellerPrivateKey)
+
+        
+        if len(Wallet_) == 0: # Not Found
+            return jsonify({}), 404
+        else:
+            Address = Wallet_["Address"]
+            PrivateKeys[SellerPrivateKey] = Address
+            Wallets[PrivateKeys[SellerPrivateKey]] = Wallet_
+    else:
+        Address = PrivateKeys[SellerPrivateKey]
+    
+
+    # Fetch payer wallet
+
+    PayerAddress = ""
+
+
+    if not PayerPrivateKey in PrivateKeys:
+        Wallet_ = Database.FindWallet(PrivateKey=PayerPrivateKey)
+
+        
+        if len(Wallet_) == 0: # Not Found
+            return jsonify({}), 404
+        else:
+            if Wallet_["SecretPhrase"] == PayerSecretPhrase:
+                PayerAddress = Wallet_["Address"]
+            else:
+                return jsonify({}), 403
+    else:
+        if Wallets[PrivateKeys[PayerPrivateKey]]["SecretPhrase"] == PayerSecretPhrase:
+            PayerAddress = Wallets[PrivateKeys[PayerPrivateKey]]["Address"]
+        else:
+            return jsonify({}), 403
+    
+
+    # Find invoice information & payer wallet
+
+    Invoice = ApiInvoices[Address][InvoiceId]
+    PayAmount = Invoice["Amount"]
+
+    AmountWithFees = (PayAmount * Fees_Transcate) / 100.0
+    AmountFees = PayAmount + AmountWithFees
+
+
+    if not PayerPrivateKey in PrivateKeys:
+        Wallet_ = Database.FindWallet(PrivateKey=PayerPrivateKey)
+
+        
+        if len(Wallet_) == 0: # Not Found
+            return jsonify({}), 404
+        else:
+            # Wallet connected, save the credentials in cache memony temponary 
+
+            if Wallet_["Balance"] < AmountFees:
+                return jsonify({}), 402 # Insufficient Balance
+            
+            
+            PayerAddress = Wallet_["Address"]
+            PrivateKeys[PayerPrivateKey] = PayerAddress
+            Wallets[PrivateKeys[PayerPrivateKey]] = Wallet_
+    
+
+    # Transcate the money
+
+    Wallets[Address]["Balance"] += PayAmount
+    Wallets[PayerAddress]["Balance"] -= AmountFees
+
+
+    global Earnings
+
+    
+    # Save previous month company earnings first
+
+    if DateTime.datetime.today().day == 1:
+        if not Database.CompanyLastPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month):
+            Payout()
+
+
+            if DateTime.datetime.today().month -1 > 0:
+                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month -1, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
+            else:
+                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year -1, Month=12, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
+
+
+            Earnings["WLLC"] = 0
+            Earnings["EUR"] = 0
+    
+
+    Earnings["WLLC"] += AmountWithFees
+
+    
+    # Validate blockchain and append the new block
+
+    global Blockchain_
+    Transaction_ = Transaction(CacheBlocks=Blockchain_, Sender=PayerAddress, Recipient=Address, Amount=PayAmount)
+    Blockchain_ = Blockchain_ + Transaction_.GetChain()
+
+
+    # Remove the completed invoice
+
+
+    print(ApiInvoices)
+    print(Address)
+    print(PayerAddress)
+
+
+    #del ApiInvoices[Address][InvoiceId]
+
+    #if len(ApiInvoices[Address]) == 0:
+    #    del ApiInvoices[Address]
+    
+
+    return jsonify({}), 200
+
+
+
+@CORE.route("/wallets/invoices/get", methods=["POST"])
+def InvoicesGet():
+    Payload = JSON.loads(request.get_data())
+    Seller = Payload["Seller"]
+    InvoiceId = Payload["Invoice"]
+
+
+    if Seller in ApiInvoices:
+        if InvoiceId in ApiInvoices[Seller]:
+            return jsonify({
+                "result": ApiInvoices[Seller][InvoiceId]
+            }), 200
+    
+
+    return jsonify({}), 404
+
+
+
+# P R I C E = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+def ChangePrice(Action : str, Amount : float):
+    Year = DateTime.datetime.today().year
+    Month = DateTime.datetime.today().month
+    Day = DateTime.datetime.today().day
+
+
+    # Prepare the stats wall for the first price change of the day!
+
+    ChartLoaded = False
+
+
+    global PriceChart
+
+    if Year in PriceChart:
+        if Month in PriceChart[Year]:
+            if Day in PriceChart[Year][Month]:
+                ChartLoaded = True
+    
+
+    if not ChartLoaded:
+        with open("database/Price.json", "r") as File:
+            Chart_ = JSON.loads(File.read())
+            Chart = []
+
+
+            if str(Year) in Chart_:
+                if str(Month) in Chart_[str(Year)]:
+                    if str(Day) in Chart_[str(Year)][str(Month)]:
+                        for P in Chart_[str(Year)][str(Month)][str(Day)]:
+                            Chart.append(P["Price"])
+            
+            Chart_.clear()
+            File.close()
+
+
+            if not Year in PriceChart:
+                PriceChart[Year] = {}
+            
+
+            if not Month in PriceChart[Year]:
+                PriceChart[Year][Month] = {}
+            
+
+            if not Day in PriceChart[Year][Month]:
+                PriceChart[Year][Month][Day] = []
+
+
+            PriceChart[Year][Month][Day] = Chart
+    
+
+    # = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+    NewChange = {
+        "Price": 0,
+        "Amount": Amount,
+        "Date": {
+            "Hour": DateTime.datetime.today().hour,
+            "Minute": DateTime.datetime.today().minute,
+            "Second": DateTime.datetime.today().second
+        }
+    }
+
+
+    if Action == "Increase":
+        NewChange["Price"] = ( Vault["Cash"] + Amount ) / Vault["Supply"]
+    else:
+        NewChange["Price"] = ( Vault["Cash"] - Amount ) / Vault["Supply"]
+    
+    
+    PriceChart[Year][Month][Day].append(NewChange)
+    
+    global PriceNow
+    PriceNow = NewChange["Price"]
+
+
+
+@CORE.route("/price", methods=["GET"])
+def GetPrice():
+    return jsonify({
+        "result": PriceNow
+    }), 200
+
+
+
+@CORE.route("/getCryptoData", methods=["GET"])
+def GetCryptoData():
+    Stats = GetStats(Queries=request.args, List="hours")
+
+
+    return jsonify({
+        "result": {
+            "Price": PriceNow,
+            "Volume": Stats["Volume"],
+            "Supply": Vault["Supply"],
+            "Bought": Vault["Owned"]
+        }
+    })
+
+
+
+@CORE.route("/price/<string:List>", methods=["GET"])
+def GetPriceChart(List):
+    return jsonify({
+        "result": GetStats(Queries=request.args, List=List)
+    }), 200
+
+
+
+def GetStats(Queries, List : str):
+    if List == "years":
+
+        # Get total stats = = = = = = = = = = = =
+    
+        with open("database/Price.json", "r") as File:
+            Stats = JSON.loads(File.read())
+            Stats = Stats["Chart"]
+            Volume = 0
+            Total = []
+
+
+            for Year in Stats:
+                for Month in Stats[Year]:
+                    for Day in Stats[Year][Month]:
+                        Price_ = 0
+
+                        
+                        for S in Stats[Year][Month][Day]:
+                            Price_ = S["Price"]
+                            Volume += S["Amount"]
+                        
+
+                        # Search in temporary memory for this day
+
+                        if int(Year) in PriceChart:
+                            if int(Month) in PriceChart[int(Year)]:
+                                if int(Day) in PriceChart[int(Year)][int(Month)]:
+                                    for S in Stats[int(Year)][int(Month)][int(Day)]:
+                                        Price_ = S["Price"]
+                                        Volume += S["Amount"]
+
+
+                        Total.append({
+                            "Tag": "%s/%s/%s" % (str(Year), str(Month), str(Day)),
+                            "Value": Price_
+                        })
+            
+
+            File.close()
+            Stats.clear()
+
+
+            FirstYear = 0
+            LastYear = 0
+
+
+            if len(Total) != 0:
+                FirstYear = Total[0]["Value"]
+                LastYear = Total[len(Total) -1]["Value"]
+
+
+            ChangePercent = 0
+
+            if FirstYear > 0 or LastYear > 0:
+                ChangePercent = round((LastYear - FirstYear) / abs(FirstYear) * 100.0, 2)
+
+
+            Changed = ""
+
+
+            if LastYear >= FirstYear:
+                Changed = "Increase"
+            else:
+                Changed = "Decrease"
+
+
+            return {
+                "Time": "Total",
+                "Price": PriceNow,
+                "Changed": Changed,
+                "ChangePercent": ChangePercent,
+                "Owned": Vault["Owned"],
+                "ForSell": Vault["Supply"] - Vault["Owned"],
+                "Volume": Volume,
+                "MarketCap": Vault["Cash"],
+                "Stats": Total
+            }
+
+
+    elif List == "months":
+        # Get the annual stats = = = = = = = = = = = =
+
+        if "year" in Queries:
+            Year = Queries.get("year")
+
+
+            with open("database/Price.json", "r") as File:
+                Stats = JSON.loads(File.read())
+                Stats = Stats["Chart"]
+                Volume = 0
+                Annual = []
+
+
+                if Year in Stats:
+                    for Month in Stats[Year]:
+                        for Day in Stats[Year][Month]:
+                            Price_ = 0
+
+                            
+                            for S in Stats[Year][Month][Day]:
+                                Price_ = S["Price"]
+                                Volume += S["Amount"]
+                            
+
+                            # Search in temporary memory for this day
+
+                            if int(Year) in PriceChart:
+                                if int(Month) in PriceChart[int(Year)]:
+                                    if int(Day) in PriceChart[int(Year)][int(Month)]:
+                                        for S in Stats[int(Year)][int(Month)][int(Day)]:
+                                            Price_ = S["Price"]
+                                            Volume += S["Amount"]
+
+
+                            Annual.append({
+                                "Tag": "%s/%s" % (str(Month), str(Day)),
+                                "Value": Price_
+                            })
+
+
+                File.close()
+                Stats.clear()
+
+
+                FirstMonth = 0
+                LastMonth = 0
+
+
+                if len(Annual) != 0:
+                    FirstMonth = Annual[0]["Value"]
+                    LastMonth = Annual[len(Annual) -1]["Value"]
+
+
+                ChangePercent = 0
+
+                if FirstMonth > 0 or LastMonth > 0:
+                    ChangePercent = round((LastMonth - FirstMonth) / abs(FirstMonth) * 100.0, 2)
+                
+
+                Changed = ""
+
+
+                if LastMonth >= FirstMonth:
+                    Changed = "Increase"
+                else:
+                    Changed = "Decrease"
+
+
+                return {
+                    "Time": "Year",
+                    "Price": PriceNow,
+                    "Changed": Changed,
+                    "ChangePercent": ChangePercent,
+                    "Owned": Vault["Owned"],
+                    "ForSell": Vault["Supply"] - Vault["Owned"],
+                    "Volume": Volume,
+                    "MarketCap": Vault["Cash"],
+                    "Stats": Annual
+                }
+        
+        return {
+            "message": "Invalid data passed.",
+            "status_code": 400
         }
 
-        Database.AddWallet(Name=Wallet, Wallet=NewWallet, PublicKey=Keys[0])
-        return jsonify({"result": NewWallet})
+
+    elif List == "days":
+        # Get the stats of a month = = = = = = = = = = =
+
+        if "month" in Queries and "year" in Queries:
+            Year = Queries.get("year")
+            Month = Queries.get("month")
 
 
-
-@app.route("/api/wallet/connect/", methods=["GET"])
-def ConnectWallet():
-    if request.method == "GET":
-        RequestArguments = request.args
-
-
-        if not "AccessToken" in RequestArguments:
-            return jsonify({"result": {"error": "AccessToken argument doesnt exist!"}})
-
-        AccessToken = RequestArguments.get("AccessToken")
-
-
-        Wallet = Database.LoginWalletWithAccessToken(AccessToken=AccessToken)
-
-
-        if Wallet == "Wallet didnt found!":
-            return jsonify({"result": {"error": "This account doesnt exist"}})
-        else:
-            return jsonify({"result": {"Address": Wallet[0], "Balance": Wallet[1]}})
-
-
-
-@app.route("/api/transaction/", methods=["POST"])
-def ApiTransaction():
-    if request.method == "POST":
-        RequestArguments = request.args
-
-
-        if not "WalletAddress" in RequestArguments:
-            return jsonify({"result": {"error": "WalletAddress doesnt exist!"}})
-        
-        WalletAddress = RequestArguments.get("WalletAddress")
-
-
-        if not "AccessToken" in RequestArguments:
-            return jsonify({"result": {"error": "AccessToken argument doesnt exist!"}})
-
-        AccessToken = RequestArguments.get("AccessToken")
-
-
-        if not "Amount" in RequestArguments:
-            return jsonify({"result": {"error": "amount doesnt exist!"}})
-        
-        Amount = RequestArguments.get("Amount")
-
-
-        return Database.apiTransaction(AccessToken=AccessToken, Wallet=WalletAddress, Amount=Amount)
-
-
-
-@app.route("/api/withdraw", methods=["POST"])
-def Withdraw():
-    if request.method == "POST":
-        RequestArguments = request.args
-
-
-        if "Secret" in RequestArguments:
-            if RequestArguments.get("Secret") == "WLLC_TRANS_2811":
-                From, To = "", ""
-                Amount = 0.0
-
-
-                if "From" in RequestArguments:
-                    From = RequestArguments.get("From")
+            with open("database/Price.json", "r") as File:
+                Stats = JSON.loads(File.read())
+                Stats = Stats["Chart"]
+                Volume = 0
+                Daily = []
                 
 
-                if "To" in RequestArguments:
-                    To = RequestArguments.get("To")
+                if Year in Stats:
+                    if Month in Stats[Year]:
+                        for Day in Stats[Year][Month]:
+                            for S in Stats[Year][Month][Day]:
+                                Volume += S["Amount"]
+
+                                Daily.append({
+                                    "Tag": "%s/%s/%s::" % (str(Year), str(Month), str(Day)) + "%s:%s:%s" % (str(S["Date"]["Hour"]), str(S["Date"]["Minute"]), str(S["Date"]["Second"])),
+                                    "Value": S["Price"]
+                                })
+                            
+
+                            # Search in temporary memory for this day
+
+                            if int(Year) in PriceChart:
+                                if int(Month) in PriceChart[int(Year)]:
+                                    if int(Day) in PriceChart[int(Year)][int(Month)]:
+                                        for S in Stats[int(Year)][int(Month)][int(Day)]:
+                                            Volume += S["Amount"]
+
+                                            Daily.append({
+                                                "Tag": "%s/%s/%s::" % (str(Year), str(Month), str(Day)) + "%s:%s:%s" % (str(S["Date"]["Hour"]), str(S["Date"]["Minute"]), str(S["Date"]["Second"])),
+                                                "Value": S["Price"]
+                                            })
                 
 
-                if "Amount" in RequestArguments:
-                    Amount = RequestArguments.get("Amount")
+                File.close()
+                Stats.clear()
 
 
-                Database.UpdateWalletData(Wallet=From, Amount=Amount, Action="Remove")
-                Database.UpdateWalletData(Wallet=To, Amount=Amount, Action="Add")
+                FirstDay = 0
+                LastDay = 0
 
 
+                if len(Daily) != 0:
+                    FirstYear = Daily[0]["Value"]
+                    LastYear = Daily[len(Daily) -1]["Value"]
 
-@app.route("/api/newPlayer/", methods=["POST"])
-def NewPlayer():
-    if request.method == "POST":
-        RequestArguments = request.args
+
+                ChangePercent = 0
+
+                if FirstDay > 0 or LastDay > 0:
+                    ChangePercent = round((LastDay - FirstDay) / abs(FirstDay) * 100.0, 2)
+                
+                
+                Changed = ""
+
+
+                if LastDay >= FirstDay:
+                    Changed = "Increase"
+                else:
+                    Changed = "Decrease"
+
+
+                return {
+                    "Time": "Months",
+                    "Price": PriceNow,
+                    "Changed": Changed,
+                    "ChangePercent": ChangePercent,
+                    "Owned": Vault["Owned"],
+                    "ForSell": Vault["Supply"] - Vault["Owned"],
+                    "Volume": Volume,
+                    "MarketCap": Vault["Cash"],
+                    "Stats": Daily
+                }
         
+        return {
+            "message": "Invalid data passed.",
+            "status_code": 400
+        }
+    else:
+        # Get the stats of a day = = = = = = = = = = = =
 
-        if not "game" in RequestArguments:
-            return jsonify({"result": {"error": "'game' argument doesnt exist in request body!"}})
+        if "day" in Queries and "month" in Queries and "year" in Queries:
+            Year = Queries.get("year")
+            Month = Queries.get("month")
+            Day = Queries.get("day")
+
+
+            with open("database/Price.json", "r") as File:
+                Stats = JSON.loads(File.read())
+                Stats = Stats["Chart"]
+                Volume = 0
+                Hours = []
+
+
+                if Year in Stats:
+                    if Month in Stats[Year]:
+                        if Day in Stats[Year][Month]:
+                            for S in Stats[Year][Month][Day]:
+                                Volume += S["Amount"]
+                                Hours.append({
+                                    "Tag": "%s:%s:%s" % (str(S["Date"]["Hour"]), str(S["Date"]["Minute"]), str(S["Date"]["Second"])),
+                                    "Value": S["Price"]
+                                })
+                
+
+                # Now get the new stats from cache
+                if int(Year) in PriceChart:
+                    if int(Month) in PriceChart[int(Year)]:
+                        if int(Day) in PriceChart[int(Year)][int(Month)]:
+                            for S in PriceChart[int(Year)][int(Month)][int(Day)]:
+                                Volume += S["Amount"]
+                                Hours.append({
+                                    "Tag": "%s:%s:%s" % (str(S["Date"]["Hour"]), str(S["Date"]["Minute"]), str(S["Date"]["Second"])),
+                                    "Value": S["Price"]
+                                })
+                
+
+                File.close()
+                Stats.clear()
+
+                
+                FirstHour = 0
+                LastHour = 0
+
+
+                if len(Hours) != 0:
+                    FirstYear = Hours[0]["Value"]
+                    LastYear = Hours[len(Hours) -1]["Value"]
+
+
+                ChangePercent = 0
+
+                if FirstHour > 0 or LastHour > 0:
+                    ChangePercent = round((LastHour - FirstHour) / abs(FirstHour) * 100.0, 2)
+
+
+                Changed = ""
+
+
+                if LastHour >= FirstHour:
+                    Changed = "Increase"
+                else:
+                    Changed = "Decrease"
+
+
+                return {
+                    "Time": "Day",
+                    "Price": PriceNow,
+                    "Changed": Changed,
+                    "ChangePercent": ChangePercent,
+                    "Owned": Vault["Owned"],
+                    "ForSell": Vault["Supply"] - Vault["Owned"],
+                    "Volume": Volume,
+                    "MarketCap": Vault["Cash"],
+                    "Stats": Hours
+                }
         
-        GameName = RequestArguments.get("game")
-        
-
-        if not "playerUname" in RequestArguments:
-            return jsonify({"result": {"error": "player's username doesnt exist in the request body!"}})
-
-        PlayerUsername = RequestArguments.get("playerUname")
-
-
-        if GameName in Disk.Games:
-            Disk.Games[GameName]["Playings"] += 1
-
-        else:
-            Game = Database.GetGameData(GameName)
-            Game["Playings"] += 1
-
-            Disk.UpdateGameData(Game)
-
-        
-        return jsonify({"result": "New playing added to game: {0}".format(GameName)})
+        return {
+            "message": "Invalid data passed.",
+            "status_code": 400
+        }
 
 
 
-@app.route("/api/donateGame/", methods=["POST"])
-def DonateGame():
-    if request.method == "POST":
-        RequestArgs = request.args
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-        GameName : str
-        Donater : str
-        Amount : float
-
-
-        if not "game" in RequestArgs:
-            return jsonify({"result": {"error": "'game' argument doesnt exist!"}})
-        else: GameName = RequestArgs.get("game")
+def Payout():
+    Holders = Database.CompanyHolders()
+    Earnings_ = Database.GetCompanyEarnings()
+    WLLC = Earnings_[0]
+    EUR = Earnings_[1]
+    CompanyPayouts_ = {}
 
 
-        if not "donator" and not "donater" in RequestArgs:
-            return jsonify({"result": {"error": "donator's username doesnt exist! Remember, you can use 'donator' or 'donater' in the request arguments!"}})
-        else:
-            if "donater" in RequestArgs:
-                Donater = RequestArgs.get("donater")
-            elif "donator" in RequestArgs:
-                Donater = RequestArgs.get("donator")
-        
-        
-        if not "amount" in RequestArgs:
-            return jsonify({"result": {"error": "please define an amount that sender will donate!"}})
-        else: Amount = RequestArgs.get("amount")
+    for Holder in Holders:
+        # Payout in crypto
 
-        
-        Account = Database.LoginWithApiKey(Donater)
-        if Account[6] == None: # api key
-            return jsonify({"result": {"error": "This api key did not found!"}})
-        
-        if Account[6] == Donater:
-            if float(Account[4]) < float(Amount): # balance
-                return jsonify({"result": {"error": "This amount isnt available in your wallet!"}})
+        if not Holder["Wallet"] in Wallets:
+            KeyFound = False
+            Key = ""
+
+
+            for Priv in PrivateKeys:
+                if PrivateKeys[Priv] == Holder["Wallet"]:
+                    KeyFound = True
+                    Key = Priv
             
+
+            if KeyFound == False:
+                Key = Database.FindPrivKey(Holder["Wallet"])
+                KeyFound = True
+
+
+            Wallet_ = Database.FindWallet(PrivateKey=Key)
+
+            if len(Wallet_) > 0:
+                PrivateKeys[Key] = Wallet_["Address"]
+                Wallets[Wallet_["Address"]] = Wallet_
+
+
+        # Transfer the money
+        Wallets[Holder["Wallet"]]["Balance"] += WLLC / len(Holders)
+
+
+        CompanyPayouts_[Holder["Name"]] = {
+            "Amount": WLLC / len(Holders),
+            "Time": {
+                "Hour": DateTime.datetime.today().hour,
+                "Minute": DateTime.datetime.today().minute,
+                "Second": DateTime.datetime.today().second
+            }
+        }
+
+    Database.SaveCompanyPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month, Body=CompanyPayouts_)
+
+
+    # Payout in euro
+
+
+
+@CORE.route("/save", methods=["POST"])
+def CacheSave():
+    if DateTime.datetime.today().day == 1:
+        if not Database.CompanyLastPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month):
+            Payout()
+
+            if DateTime.datetime.today().month -1 > 0:
+                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month -1, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
             else:
-                Database.PayGame(GameName, Donater, float(Amount))
-        
-        return jsonify({"result": "Someone Donated your game!"})
-
-
-
-@app.route("/api/payToPlay", methods=["POST"])
-def PayGame():
-    if request.method == "POST":
-        RequestArgs = request.args
-
-        GameName : str
-        Purchacer : str
-        Amount : float
-
-
-        if not "game" in RequestArgs:
-            return jsonify({"result": {"error": "'game' argument doesnt exist!"}})
-        else: GameName = RequestArgs.get("game")
-
-
-        if not "purchaser" in RequestArgs:
-            return jsonify({"result": {"error": "please define the purchaser of the game!"}})
-        else: Purchacer = RequestArgs.get("purchaser")
-        
-
-        if not "amount" in RequestArgs:
-            return jsonify({"result": {"error": "please define an amount that sender will pay!"}})
-        else: Amount = RequestArgs.get("amount")
-
-
-        Account = Database.LoginWithApiKey(Purchacer)
-        if Account[6] == None: # api key
-            return jsonify({"result": {"error": "This api key not found!"}})
-        
-        if Account[6] == Purchacer:
-            if float(Account[4]) < float(Amount): # balance
-                return jsonify({"result": {"error": "This amount isnt available in your wallet!"}})
+                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year -1, Month=12, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
             
-            else:
-                Database.PayGame(GameName, Purchacer, float(Amount))
+            Earnings["WLLC"] = 0
+            Earnings["EUR"] = 0
 
-        return jsonify({"result": "Someone Payed your game!"})
+
+    Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
+    
+    
+    Database.SavePrice(Price=PriceNow, Cash=Vault["Cash"], Supply=Vault["Supply"], Owned=Vault["Supply"], Chart=PriceChart)
+    Database.SaveWallets(Wallets=Wallets, Deleted=DeletedWallets)
+    Database.SavePrivateKeys(PrivateKeys=PrivateKeys, Deleted=DeletedPrivateKeys)
+    Database.SaveWalletPayouts(Payouts=Payouts)
+
+
+    global Blockchain_
+    Database.SaveBlockchain(Chain=Blockchain_)
+
+
+    PriceChart.clear()
+    Wallets.clear()
+    PrivateKeys.clear()
+    Blockchain_ = []
+
+
+    if "close" in request.args: # Used to stop the program in order to upload a new update without losing any temporary data
+        quit()
+
+
+    return jsonify({}), 200
 
 
 
 if __name__ == '__main__':
-    app.secret_key = 'secret123'
-    app.run(debug = True)
+    CORE.secret_key = 'secret123'
+    CORE.run(port=3048, debug=True)

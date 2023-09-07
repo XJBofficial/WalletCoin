@@ -1,83 +1,151 @@
 from hashlib import sha256
-import datetime as DateTime
-import DISKuse as Disk
+import datetime as Date
+import json as JSON
 import Database
 
 
 
-def updatehash(*args):
-    hashing_text = ""; h = sha256()
-
-    # Loop through each argument and hash
-    for arg in args:
-        hashing_text += str(arg)
-
-    h.update(hashing_text.encode('utf-8'))
-    return h.hexdigest()
-
-
-
-class Block():
-    def __init__(self, Number = 0, PreviousHash = "0" * 64, Data = None, Nonce = 0):
-        self.Data = Data
-        self.Number = Number
-        self.PreviousHash = PreviousHash
+class Block:
+    def __init__(self, Number : int, Nonce : int, PreviousHash : str, Data : str, Sender : str, Recipient : str, Amount : float, Day : str, Hour : str):
+        self.Block = Number
         self.Nonce = Nonce
-
-
-    def hash(self):
-        return updatehash(self.Number, self.PreviousHash, self.Data, self.Nonce)
-
-
-    def __str__(self):
-        return str("Block#: %s\nHash: %s\nPrevious: %s\nData: %s\nNonce: %s\n" % (
-            self.Number, self.hash(), self.PreviousHash, self.Data, self.Nonce)
-        )
-
-
-
-class Blockchain():
-    difficulty = 3
-
-
-    def __init__(self):
-        self.chain = []
+        self.PreviousHash = PreviousHash
+        self.Data = Data
+        self.Sender = Sender
+        self.Recipient = Recipient
+        self.Amount = Amount
+        self.Day = Day
+        self.Hour = Hour
     
 
-    def mine(self, Block_, MyBlockNumber):
-        Number : int
+    def CreateHash(self):
+        HashedText = str(self.Block) + str(self.Nonce) + self.PreviousHash + self.Data + self.Sender + self.Recipient + str(self.Amount) + self.Day + self.Hour
+        SHA256 = sha256()
+        SHA256.update(HashedText.encode("utf-8"))
+        return SHA256.hexdigest()
 
 
-        if MyBlockNumber == None:
-            BiggestBlock = 0
 
-            for Bl in Database.GetBlockchain():
-                if Bl["Number"] > BiggestBlock:
-                    BiggestBlock = Bl["Number"]
-            
-            Number = BiggestBlock
-        else:
-            Number = MyBlockNumber + 1
-        
+class Blockchain:
+    def __init__(self):
+        self.Nonce = 30
+        self.Chain = []
+    
+
+    def GenerateBlock(self, Number : int, Nonce : int, PreviousHash : str, Data : str, Sender : str, Recipient : str, Amount : float):
+        Day = "%s/%s/%s" % (str(Date.datetime.today().day), str(Date.datetime.today().month), str(Date.datetime.today().year))
+        Hour = "%s::%s::%s" % (str(Date.datetime.today().hour), str(Date.datetime.today().minute), str(Date.datetime.today().second))
+        Block_ = Block(Number=Number, Nonce=Nonce, PreviousHash=PreviousHash, Data=Data, Sender=Sender, Recipient=Recipient, Amount=Amount, Day=Day, Hour=Hour)
+        Bl = {
+			"Block": Number,
+            "Nonce": Nonce,
+			"Hash": Block_.CreateHash(),
+			"PrevHash": PreviousHash,
+			"Data": Data,
+			"Sender": Sender,
+            "Recipient": Recipient,
+            "Amount": Amount,
+			"Day": Day,
+			"Hour": Hour
+		}
+
+        return Bl
 
 
-        NewBlock = {
-            "Number": Number,
-            "PreviousHash": Block_.PreviousHash,
-            "Hash": Block_.hash(),
-            "Data": Block_.Data,
-            "Nonce": Block_.Nonce
-            }
-        
-        Disk.Blockchain.append(NewBlock)
+    def GenerateGeneticBlock(self):
+        Day = "%s/%s/%s" % (str(Date.datetime.today().day), str(Date.datetime.today().month), str(Date.datetime.today().year))
+        Hour = "%s::%s::%s" % (str(Date.datetime.today().hour), str(Date.datetime.today().minute), str(Date.datetime.today().second))
+        Block_ = Block(Number=0, Nonce=self.Nonce, PreviousHash="0" * self.Nonce, Data="Genetic Block", Sender="", Recipient="", Amount=0, Day=Day, Hour=Hour)
+        Genetic = {
+			"Block": 0,
+            "Nonce": self.Nonce,
+			"Hash": Block_.CreateHash(),
+			"PrevHash": "0" * self.Nonce,
+			"Data": "Genetic Block",
+			"Sender": "",
+            "Recipient": "",
+            "Amount": 0,
+			"Day": Day,
+			"Hour": Hour
+		}
+
+        return Genetic
+    
+
+    def IsValid(self, CacheBlocks : list):
+        Blocks = Database.GetBlockchain(Cache=CacheBlocks)
 
 
-    def isValid(self):
-        for i in range(1, len(self.chain)):
-            _previous = self.chain[i].PreviousHash
-            _current = self.chain[i-1].hash()
+        for B in Blocks:
+            Block_ = Block(Number=B["Block"], Nonce=B["Nonce"], PreviousHash=B["PrevHash"], Data=B["Data"], Sender=B["Sender"], Recipient=B["Recipient"], Amount=B["Amount"], Day=B["Day"], Hour=B["Hour"])
 
-            if _previous != _current or _current[:self.difficulty] != "0" * self.difficulty:
+
+            if Block_.CreateHash() != B["Hash"]:
                 return False
+        
 
         return True
+    
+
+    def FindMyBlocks(self, CacheBlocks : list, Wallet : str):
+        return Database.GetBlockByWallet(Cache=CacheBlocks, Wallet=Wallet)
+    
+
+    def FindBlockByNumber(self, CacheBlocks : list, Number : int):
+        return Database.GetBlockByNumber(Cache=CacheBlocks ,Block=Number)
+    
+
+    def GetLastBlocks(self, CacheBlocks : list, Count : int):
+        Blocks = []
+
+
+        if len(CacheBlocks) >= Count:
+            for Block_ in range(len(CacheBlocks) -1, len(CacheBlocks) - Count -1, -1):
+                Blocks.append(CacheBlocks[Block_])
+        else:
+            LoadMore = len(CacheBlocks) - Count
+
+            for Block_ in range(len(CacheBlocks) -1, -1, -1):
+                Blocks.append(CacheBlocks[Block_])
+
+            with open("database/Blockchain.json", "r") as File:
+                Blockchain_ = JSON.loads(File.read())
+
+                if len(Blockchain_) >= LoadMore and LoadMore > 0:
+                    for Block_ in range(len(Blockchain_) -1, len(Blockchain_) - LoadMore -1, -1):
+                        Blocks.append(Blockchain_[Block_])
+                else:
+                    for Block_ in range(len(Blockchain_) -1, -1, -1):
+                        Blocks.append(Blockchain_[Block_])
+
+                Blockchain_.clear()
+                File.close()
+        
+
+        return Blocks
+
+
+    def GetLastBlockNumber(self, CacheBlocks : list):
+        Number = -1
+
+
+        for Block_ in CacheBlocks:
+            if Block_["Block"] > Number:
+                Number = Block_["Block"]
+        
+
+
+        with open("database/Blockchain.json", "r") as File:
+            Blockchain_ = JSON.loads(File.read())
+
+            
+            for Block_ in Blockchain_:
+                if Block_["Block"] > Number:
+                    Number = Block_["Block"]
+            
+
+            Blockchain_.clear()
+            File.close()
+        
+
+        return Number
