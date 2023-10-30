@@ -59,23 +59,6 @@
     <div class="StatisticsWall">
       <ul class="StatisticsWall-Line">
         <div class="StatisticsWall-Item">
-          <strong class="StatisticsWall-Item-Title">Price Changed</strong>
-          <label class="StatisticsWall-Item-Value">{{ Change }}</label>
-        </div>
-
-        <div class="StatisticsWall-Item">
-          <strong class="StatisticsWall-Item-Title">Volume</strong>
-          <label class="StatisticsWall-Item-Value">{{ Volume }} EUR</label>
-        </div>
-
-        <div class="StatisticsWall-Item">
-          <strong class="StatisticsWall-Item-Title">Market Cap</strong>
-          <label class="StatisticsWall-Item-Value">{{ MarketCap }} EUR</label>
-        </div>
-      </ul>
-
-      <ul class="StatisticsWall-Line">
-        <div class="StatisticsWall-Item">
           <strong class="StatisticsWall-Item-Title">Owned</strong>
           <label class="StatisticsWall-Item-Value">{{ Owned }} WLLC</label>
         </div>
@@ -87,7 +70,19 @@
 
         <div class="StatisticsWall-Item">
           <strong class="StatisticsWall-Item-Title">Price</strong>
-          <label class="StatisticsWall-Item-Value">{{ Price }} EUR</label>
+          <label class="StatisticsWall-Item-Value">€ {{ Price }}</label>
+        </div>
+      </ul>
+
+      <ul class="StatisticsWall-Line">
+        <div class="StatisticsWall-Item">
+          <strong class="StatisticsWall-Item-Title">Price Changed</strong>
+          <label class="StatisticsWall-Item-Value">{{ Change }}</label>
+        </div>
+
+        <div class="StatisticsWall-Item">
+          <strong class="StatisticsWall-Item-Title">Market Cap</strong>
+          <label class="StatisticsWall-Item-Value">€ {{ MarketCap }}</label>
         </div>
       </ul>
     </div>

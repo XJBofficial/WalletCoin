@@ -8,12 +8,11 @@
   <link href="../static/style/Trade.css" rel="stylesheet">
   <link  rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/Trade.css') }}">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="{{ url_for('static', filename='js/Revolut.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/Buy.js') }}"></script>
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
 
 
-<div class="Form">
+<form class="Form" action="/buy" method="post">
   <h1 class="BlackTitle">Buy WalletCoins</h1>
   <div style="padding-bottom: 20px;"></div>
 
@@ -22,21 +21,23 @@
   </div>
 
   <div class="Amount-DIV">
-    <input class="Input" id="Amount" type="number" name="amount" placeholder="Amount" required>
+    <input class="Input" id="Amount" type="number" name="Amount" placeholder="Amount" required>
+    <input class="Input" id="CurrencyInput" type="hidden" name="Currency">
     <button class="CurrencyChangeButton" onclick="ChangeCurrency();"></button>
   </div>
 
   <div class="CalculatedAmount"></div>
   <div class="Notification"></div>
   
-  <div id='revolut-pay'></div>
+  <input id="BuyWalletCoins" type="submit" value="Buy Now">
 
 
   <script type="text/javascript">
     const Amount = document.querySelector("#Amount");
     const CurrencyChangeButton = document.querySelector(".CurrencyChangeButton");
+    const CurrencyInput = document.querySelector("#CurrencyInput");
     const CalculatedAmount = document.querySelector(".CalculatedAmount");
-    const RevolutPayButton = document.querySelector("#revolut-pay");
+    const BuyButton = document.querySelector("#BuyWalletCoins");
     const Notification = document.querySelector(".Notification");
 
     let Currency = "EUR";
@@ -54,6 +55,8 @@
       } else {
         Currency = "EUR";
       }
+
+      CurrencyInput.value = Currency;
     }
 
 
@@ -64,10 +67,10 @@
           Notification.innerHTML = "";
         }
 
-        RevolutPayButton.style.display = "block";
+        BuyButton.style.display = "block";
       } else {
         Notification.innerHTML = "Min 10 €, Max 100,000 €.";
-        RevolutPayButton.style.display = "none";
+        BuyButton.style.display = "none";
       }
 
       CalculatePrice();
@@ -115,7 +118,7 @@
       }
     }
   </script>
-</div>
+</form>
 
 
 <div style="padding-bottom: 250px;"></div>

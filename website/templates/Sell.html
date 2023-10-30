@@ -20,11 +20,32 @@
     </p>
   </div>
   
+
+  <div class="Information">
+    <div id="BankAccount">
+      <label class="SellPayoutMethodLabel">Payout in your bank:</label>
+      <input class="Input" id="Country" type="text" name="Country" placeholder="Country Code">
+      <input class="Input" id="CurrencyCode" type="text" name="CurrencyCode" placeholder="Currency Code ( e.g. EUR, USD )">
+      <input class="Input" id="HolderName" type="text" name="HolderName" placeholder="Holder Name">
+      <input class="Input" id="HolderType" type="text" name="HolderType" placeholder="Holder Type ( individual or business )">
+
+      <div class="Form-CheckBox">
+        <input class="CheckBox" id="European" type="checkbox" name="European" onchange="EuropeanCitizenCheckChange();">
+        <label id="Form-CheckBox-Label">Im European or UK citizen</label>
+      </div>
+
+      <input class="Input" id="RoutingNumber" type="text" name="RoutingNumber" placeholder="Routing Number">
+      <input class="Input" id="AccountNumber" type="text" name="AccountNumber" placeholder="Account Number">
+      <input class="Input" id="IBAN" type="text" name="IBAN" placeholder="IBAN Number">
+    </div>
+  </div>
+
+
   <div class="Amount-DIV">
-    <input class="Input" id="Name" type="text" name="name" placeholder="Your Full Name" required>
-    <input class="Input" id="Amount" type="number" name="amount" placeholder="Amount" required>
+    <input class="Input" id="Amount" type="number" name="Amount" placeholder="Amount" required>
     <button class="CurrencyChangeButton" onclick="ChangeCurrency();"></button>
   </div>
+
 
   <div class="CalculatedAmount"></div>
   <div class="Notification"></div>
@@ -33,22 +54,29 @@
 
   
   <script type="text/javascript">
-    const FullName = document.querySelector("#Name");
+    const BankAccount = document.querySelector("#BankAccount");
+    const BankAccount_Country = document.querySelector("#BankAccount #Country");
+    const BankAccount_Currency = document.querySelector("#BankAccount #CurrencyCode");
+    const BankAccount_HolderName = document.querySelector("#BankAccount #HolderName");
+    const BankAccount_HolderType = document.querySelector("#BankAccount #HolderType");
+    const BankAccount_EuropeanCitizenCheck = document.querySelector("#BankAccount #European");
+    const BankAccount_RoutingNumber = document.querySelector("#BankAccount #RoutingNumber");
+    const BankAccount_AccountNumber = document.querySelector("#BankAccount #AccountNumber");
+    const BankAccount_IBAN = document.querySelector("#BankAccount #IBAN");
     const Amount = document.querySelector("#Amount");
     const CurrencyChangeButton = document.querySelector(".CurrencyChangeButton");
     const CalculatedAmount = document.querySelector(".CalculatedAmount");
     const Notification = document.querySelector(".Notification");
+    const SellButton = document.querySelector(".SellWalletCoins");
 
     let Currency = "EUR";
     let Price = parseFloat("{{ Price }}");
+    let EuropeanCitizen = false;
+
 
     ChangeCurrency();
-
-
-    if ( "RestoreId" ) {
-      Amount.style.display = "none";
-    }
-
+    EuropeanCitizenCheck();
+    
 
 
     function ChangeCurrency() {
@@ -61,6 +89,35 @@
       }
     }
 
+
+    function EuropeanCitizenCheckChange() {
+      if ( EuropeanCitizenCheck.checked == true ) {
+        EuropeanCitizenCheck.checked = false;
+      } else {
+        EuropeanCitizenCheck.checked = true;
+      }
+
+      EuropeanCitizenCheck();
+    }
+
+
+    function EuropeanCitizenCheck() {
+      EuropeanCitizen = EuropeanCitizenCheck.checked;
+
+      if ( EuropeanCitizenCheck.checked == true ) {
+        BankAccount_IBAN.style.display = "block";
+        BankAccount_RoutingNumber.style.display = "none";
+        BankAccount_AccountNumber.style.display = "none";
+
+        EuropeanCitizen = true;
+      } else {
+        BankAccount_RoutingNumber.style.display = "block";
+        BankAccount_AccountNumber.style.display = "block";
+        BankAccount_IBAN.style.display = "none";
+
+        EuropeanCitizen = false;
+      }
+    }
 
 
     Amount.addEventListener("input", () => {
@@ -117,19 +174,66 @@
 
 
     function GetPaidNow() {
-      if ( "{{ RestoreId }}" ) {
-        fetch("/sell?restore={{ RestoreId }}", {
-          method: "POST"
+      if (Min()) {
+        let RequestBody = {};
+
+
+        if ( BankAccount_Country.value.lenght == 0 || BankAccount_Currency.value.lenght == 0 || BankAccount_HolderName.value.lenght == 0 || BankAccount_HolderType.value.lenght == 0 ) {
+          return;
+        }
+
+        if ( BankAccount_HolderType.value != "individual" && BankAccount_HolderType.value != "business" ) {
+          return;
+        }
+
+
+        Notification.innerHTML = "Processing...";
+        SellButton.value.display = "none";
+
+        
+        RequestBody = {
+          "Currency": Currency,
+          "Amount": parseFloat(Amount.value),
+          "Bank": {
+            "Currency": BankAccount_Currency.value,
+            "CountryCode": BankAccount_Country.value,
+            "HolderName": BankAccount_HolderName.value,
+            "HolderType": BankAccount_HolderType.value
+          }
+        }
+
+
+        RequestBody["Bank"]["European"] = EuropeanCitizen;
+
+        if ( EuropeanCitizen == true ) {
+          if ( BankAccount_IBAN.value.lenght == 0 ) {
+            return;
+          }
+
+          RequestBody["Bank"]["IBAN"] = BankAccount_IBAN.value;
+        } else {
+          if ( BankAccount_RoutingNumber.value.lenght == 0 || BankAccount_AccountNumber.value.lenght == 0 ) {
+            return;
+          }
+
+          RequestBody["Bank"]["RoutingNumber"] = BankAccount_RoutingNumber.value;
+          RequestBody["Bank"]["AccountNumber"] = BankAccount_AccountNumber.value;
+        }
+
+
+        fetch("/sell", {
+          method: "POST",
+          body: JSON.stringify(RequestBody)
         })
         .then((response) => {
           if ( response.status != 200 ) {
             switch (response.status) {
-              case 500:
-                Notification.innerHTML = "Payout is already completed.";
+              case 400:
+                Notification.innerHTML = "Min 10 €.";
                 break;
               
-              case 404:
-                Notification.innerHTML = "Payout not found.";
+              case 500:
+                Notification.innerHTML = "Internal server error.";
                 break;
             }
           }
@@ -141,39 +245,11 @@
             window.location.href = data["Url"];
           }
         })
-      } else {
-        if (Min() && FullName.value.length > 0) {
-            fetch("/sell", {
-              method: "POST",
-              body: JSON.stringify({
-                "Name": FullName.value,
-                "Currency": Currency,
-                "Amount": parseFloat(Amount.value)
-              })
-            })
-            .then((response) => {
-              if ( response.status != 200 ) {
-                switch (response.status) {
-                  case 400:
-                    Notification.innerHTML = "Min 10 €.";
-                    break;
-                  
-                  case 500:
-                    Notification.innerHTML = "Internal server error.";
-                    break;
-                }
-              }
+        
 
-              return response.json();
-            })
-            .then((data) => {
-              if ( "Url" in data ) {
-                window.location.href = data["Url"];
-              }
-            })
-          }
-        }
+        SellButton.value.display = "block";
       }
+    }
   </script>
 </div>
 
