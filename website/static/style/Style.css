@@ -115,8 +115,23 @@
 
 /* Walletcoin's site table design */
 
+.ClassicTable {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: whitesmoke;
+    text-align: center;
+    border: #b3b3b3 1px solid;
+    border-radius: 5px;
+    justify-content: center;
+}
+
+.ClassicTableItem {
+    font-size: 20px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
 .TableItem {
-    background-color: white;
+    background-color: #ffffff;
     margin-bottom: 3px;
     border-radius: 6px;
 }
@@ -158,19 +173,16 @@
     width: 530px;
 }
 
-.ClassicTable {
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: whitesmoke;
-    text-align: center;
-    border: #b3b3b3 1px solid;
-    border-radius: 5px;
-    justify-content: center;
+.Form-CheckBox {
+    padding-top: 30px;
+    display: flex;
 }
 
-.ClassicTableItem {
-    font-size: 20px;
-    padding-top: 40px;
-    padding-bottom: 40px;
+#Form-CheckBox-Label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    color: #767676;
+    padding-left: 5px;
 }
 
 
