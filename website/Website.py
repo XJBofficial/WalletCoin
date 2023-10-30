@@ -3,10 +3,19 @@ from functools import wraps
 
 import requests as Requests
 import datetime as DateTime
+import stripe as Stripe
+import time as Time
 import json as Json
 import Functions
 import os as OS
 
+
+#StripePUBLIC_KEY = "pk_test_51N5EBzHImWZNuXQo8QWI4wAJzHDqQIYUNYf9g5M14dmFGVKnLEOLukHeqLQYxyL7IsS5hCRhn97fJi467pTtjI8a002EtFkSLD"
+#StripeSECRET_KEY = "sk_test_51N5EBzHImWZNuXQojVDpV2LDUIhfDcHnqqC97QDODdbc4LdQjtmtbjHBBZNVIw45VUKUXx9D4a5CuNKJ45rObDy500cHgGYGJa"
+StripePUBLIC_KEY = "pk_live_51N5EBzHImWZNuXQolpw4D5mStlDSOkba9NuvDBDuPl3tRcjHEkJQDle01kR3nMEBRkJeJyHm8vvdVuRK4rhvwxUk008xIcdQ9x"
+StripeSECRET_KEY = "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"
+Stripe.api_key = StripePUBLIC_KEY
+Stripe.secret_key = StripeSECRET_KEY
 
 WEB = Flask(__name__)
 WEB.config.from_mapping(SECRET_KEY = OS.environ.get('SECRET_KEY') or 'dev_key')
@@ -14,7 +23,7 @@ WEB.config.from_mapping(SECRET_KEY = OS.environ.get('SECRET_KEY') or 'dev_key')
 Session_ = session
 
 CORE = "http://127.0.0.1:3048"
-
+DOMAIN = "http://127.0.0.1:3047"
 
 
 # Wrap to define if user has connected a wallet
@@ -92,7 +101,7 @@ def Index():
 
 
     Price = CryptoCurrencyData["Price"]
-    Volume = CryptoCurrencyData["Volume"]
+    MarketCap = CryptoCurrencyData["MarketCap"]
     Supply = CryptoCurrencyData["Supply"]
     Bought = CryptoCurrencyData["Bought"]
 
@@ -100,7 +109,7 @@ def Index():
     return render_template(
         'Index.html',
         Price=Price,
-        Volume=Volume,
+        MarketCap=MarketCap,
         Supply=Supply,
         Bought=Bought,
         Session=Session_
@@ -146,7 +155,6 @@ def PriceChart():
         PriceChange = Chart["ChangePercent"]
         Owned = Chart["Owned"]
         ForSell = Chart["ForSell"]
-        Volume = Chart["Volume"]
         MarketCap = Chart["MarketCap"]
 
 
@@ -157,7 +165,6 @@ def PriceChart():
             PriceChange=Functions.RemoveUselessNums(str(PriceChange), 2),
             Owned=Functions.RemoveUselessNums(str(Owned), 8),
             ForSell=Functions.RemoveUselessNums(str(ForSell), 8),
-            Volume=Functions.RemoveUselessNums(str(Volume), 3),
             MarketCap=Functions.RemoveUselessNums(str(MarketCap), 3),
             Chart=Chart["Stats"],
             Date=[
@@ -183,6 +190,30 @@ def WalletCreate():
 
         if Res.status_code == 200:
             Wallet = Res.json()["result"]
+
+
+            # Create a stripe account for this wallet
+            
+            Account = Stripe.Account.create(
+                api_key=StripeSECRET_KEY,
+                type="custom",
+                capabilities={
+                    "card_payments": {
+                        "requested": True
+                    },
+                    "transfers": {
+                        "requested": True
+                    }
+                }
+            )
+
+            StripePayload = {
+                "Wallet": Wallet["Address"],
+                "StripeId": Account["id"]
+            }
+            StripePayload = Json.dumps(StripePayload)
+            StripeRes = Requests.request(url=CORE + "/stripeAccount/create", method="POST", data=StripePayload)
+
 
             return render_template(
                 "WalletCreate.html",
@@ -376,36 +407,116 @@ def Transaction():
 @connected_wallet
 def Buy():
     if request.method == "POST":
-        Payload = Json.loads(request.get_data())
-
+        Payload = request.form
         Currency = Payload["Currency"]
-        Amount = Payload["Amount"]
+        Amount = int(float(Payload["Amount"]))
+        EUR = Amount
 
 
         if Currency == "EUR":
             # Convert those euros in walletcoins
-            Amount = Amount / GetPrice()
+            Amount = Amount * GetPrice()
 
+            # Check if user broke the limits
 
-        Payload = {
-            "PrivKey": Session_["PrivateKey"],
-            "Address": Session_["Address"],
-            "Amount": Amount
-        }
-        Payload = Json.dumps(Payload)
-        BuyRequest = Requests.request(url=CORE + "/wallets/buy", method="POST", data=Payload)
-
-
-        if BuyRequest.status_code == 200:
-            Session_["Balance"] = BuyRequest.json()["result"]["Balance"]
-            return redirect(url_for("Blockchain"))
+            if Amount < 10 or Amount > 100000:
+                return jsonify({
+                    "result": "Min 10 €, Max 100,000 €."
+                }), 400
         else:
-            return jsonify({
-                "result": "Error while buying more cryptos."
-            }), 500
+            # Check if user broke the limits
+
+            WLLC = Amount * GetPrice()
+            EUR = WLLC
+
+            if EUR < 10 or EUR > 100000:
+                return jsonify({
+                    "result": "Min 10 €, Max 100,000 €."
+                }), 400
+
+
+        # Record this payment
+
+        SavePaymentPayload = {
+            #"Id": Args.get("order"),
+            "Wallet": Session_["Address"],
+            "Amount": int(EUR)
+        }
+        SavePaymentPayload = Json.dumps(SavePaymentPayload)
+        SavePaymentRequest = Requests.request(url=CORE + "/payments/create", method="POST", data=SavePaymentPayload)
+
+
+        # Execute the payment
+
+        CheckoutSession = None
+
+
+        try:
+            CheckoutSession = Stripe.checkout.Session.create(
+                api_key=StripeSECRET_KEY,
+                line_items=[
+                    {
+                        'price_data': {
+                            'currency': 'eur',
+                            'unit_amount': int(str(int(EUR)) + "00"),
+                            "product_data": {
+                                "name": "%s WalletCoins" % str(Amount)
+                            }
+                        },
+                        'quantity': 1,
+                    },
+                ],
+                mode='payment',
+                success_url=DOMAIN + '/buy?payment=' + SavePaymentRequest.json()["result"]["Id"],
+                cancel_url=DOMAIN + '/buy',
+            )
+        
+        except Exception as e:
+            return str(e)
+        
+
+        return redirect(CheckoutSession.url, code=303)
     
 
     if request.method == "GET":
+        Args = request.args
+
+
+        if "payment" in Args:
+            GetPaymentRequest = Requests.request(url=CORE + "/payments/%s/%s" % (Session_["Address"], Args.get("payment")), method="GET")
+
+
+            if GetPaymentRequest.status_code == 200:
+                Res = GetPaymentRequest.json()["result"]
+                
+
+                if len(Res) > 0:
+                    if Res["Status"] == "Authorizing":
+                        # Buy the coins
+
+                        Payload = {
+                            "PrivKey": Session_["PrivateKey"],
+                            "Address": Session_["Address"],
+                            "Amount": Res["Amount"] * GetPrice()
+                        }
+                        Payload = Json.dumps(Payload)
+                        BuyRequest = Requests.request(url=CORE + "/wallets/buy", method="POST", data=Payload)
+
+
+                        if BuyRequest.status_code == 200:
+                            Session_["Balance"] = BuyRequest.json()["result"]["Balance"]
+                            return redirect(url_for("Blockchain"))
+
+
+                        # Update the payment status
+
+                        UpdatePaymentPayload = {
+                            "Status": "Success"
+                        }
+                        UpdatePaymentPayload = Json.dumps(UpdatePaymentPayload)
+                        UpdatePayment = Requests.request(url=CORE + "/payments/%s/%s/status" % (Session_["Address"], Args.get("payment")), method="POST", data=UpdatePaymentPayload)
+
+
         return render_template(
             "Buy.html",
             Balance=Session_["Balance"],
@@ -415,207 +526,165 @@ def Buy():
 
 
 
-@WEB.route("/buy/createOrder", methods=['POST'])
+@WEB.route("/sell", methods=["POST", "GET"])
 @connected_wallet
-def BuyCreateOrder():
+def Sell():
     if request.method == "POST":
+        # Payout user normally
+
         Payload = Json.loads(request.get_data())
 
         Currency = Payload["Currency"]
         Amount = Payload["Amount"]
+        Price = GetPrice()
 
 
         # Check if user broke the limits
 
         if Currency == "EUR":
-            if Amount < 10 or Amount > 100000:
+            if Amount < 10:
                 return jsonify({
-                    "result": "Min 10 €, Max 100,000 €."
+                    "result": "Min 10 €."
                 }), 400
 
             # Convert those euros in walletcoins
-            Amount = Amount / GetPrice()
+            Amount = Amount / Price
         else:
-            WLLC = Amount * GetPrice()
+            WLLC = Amount * Price
 
-            if WLLC < 10 or WLLC > 100000:
+            if WLLC < 10:
                 return jsonify({
-                    "result": "Min 10 €, Max 100,000 €."
+                    "result": "Min 10 €."
                 }), 400
         
 
-        # Create the new order
+        # Sell walletcoins and send to user his payout link
 
-        Payload = {
-            "amount": float(str(Amount) + "00"), # "00" is cents
-            "currency": "EUR"
-        }
-        Payload = Json.dumps(Payload)
-        Headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': 'Bearer <yourSecretApiKey>'
-        }
-        Res = Requests.request(url="https://merchant.revolut.com/api/1.0/orders", method="POST", headers=Headers, data=Payload)
-
-
-        return jsonify({}), 200
-
-
-
-@WEB.route("/sell", methods=["POST", "GET"])
-@connected_wallet
-def Sell():
-    if request.method == "POST":
-        # In the case of the payout didn't completed, send the payout link to the user to restore his cash
-
-        if "restore" in request.args:
-            Id = request.args.get("restore")
-
-
-            Payout = Requests.request(url=CORE + "/payouts/%s/%s" % (Session_["Address"], Id), method="GET")
-
-
-            if Payout.status_code == 200:
-                PayoutLink = Payout.json()["result"]
-
-
-                if PayoutLink["Status"] == "processed":
-                    return jsonify({}), 500
-                
-                
-                # Fetch the payout link
-
-                Headers = {
-                    'Accept': 'application/json',
-                    'Authorization': 'Bearer <TOKEN>'
-                }
-                Payout = Requests.request(url="https://b2b.revolut.com/api/1.0/payout-links/" + PayoutLink["Id"], method="GET", headers=Headers, data={})
-                
-
-                if Payout.status_code == 200:
-                    return jsonify({
-                        "Url": Payout.json()["url"]
-                    }), 200
-                
-                return jsonify({}), 404
-
+        if Session_["Balance"] < Amount:
+            return jsonify({
+                "result": "Insufficient balance."
+            }), 403
         else:
-            # Payout user normally
-
-            Payload = Json.loads(request.get_data())
-
-            Currency = Payload["Currency"]
-            Amount = Payload["Amount"]
-            Price = GetPrice()
+            EUR = Amount * GetPrice()
+            StripeAccountId = ""
 
 
-            # Check if user broke the limits
+            # First of all, search for the identity of the stripe account
 
-            if Currency == "EUR":
-                if Amount < 10:
-                    return jsonify({
-                        "result": "Min 10 €."
-                    }), 400
+            StripeAccountIdRequest = Requests.request(url=CORE + "/stripeAccount/" + Session_["Address"], method="GET")
 
-                # Convert those euros in walletcoins
-                Amount = Amount / Price
+            if StripeAccountIdRequest.status_code == 200:
+                StripeAccountId = StripeAccountIdRequest.json()["result"]["id"]
             else:
-                WLLC = Amount * Price
+                return jsonify({}), 500
 
-                if WLLC < 10:
-                    return jsonify({
-                        "result": "Min 10 €."
-                    }), 400
+
+            Stripe.Account.modify(
+                api_key=StripeSECRET_KEY,
+                stripe_account=StripeAccountId,
+                business_type="individual",
+                business_profile = {
+                        "mcc": "5817",
+                        "url": "https://www.youtube.com/channel/UC1nPOWMNYGw3ERLHYH64NSg"
+                },
+                individual={
+                "address": {
+                        "city": "Athens-Greece",
+                        "line1": "Πογραδετσ",
+                        "postal_code": "12136"
+                    },
+                    "dob": {
+                        "day": 5,
+                        "month": 2,
+                        "year": 2005
+                    },
+                    "email": "makegamesandsites@gmail.com",
+                    "first_name": Payload["Bank"]["HolderName"].split(" ")[0],
+                    "last_name": Payload["Bank"]["HolderName"].split(" ")[1],
+                    "phone": "+306970351652"
+                },
+                tos_acceptance={
+                    "date": int(Time.time()),
+                    "ip": Requests.get("https://api.ipify.org").text
+                }
+            )
+
+
+            # Connect your bank account
+
+            ConnectPayload = {
+                "country": Payload["Bank"]["CountryCode"],
+                "currency": Payload["Bank"]["Currency"].lower(),
+                "account_holder_name": Payload["Bank"]["HolderName"],
+                "account_holder_type": Payload["Bank"]["HolderType"]
+            }
+
+
+            if Payload["Bank"]["European"]:
+                ConnectPayload["account_number"] = Payload["Bank"]["IBAN"]
+            else:
+                ConnectPayload["routing_number"] = Payload["Bank"]["RoutingNumber"]
+                ConnectPayload["account_number"] = Payload["Bank"]["AccountNumber"]
             
 
-            # Sell walletcoins and send to user his payout link
+            Tok = Stripe.Token.create(
+                api_key=StripeSECRET_KEY,
+                bank_account=ConnectPayload
+            )
 
-            if Session_["Balance"] < Amount:
-                return jsonify({
-                    "result": "Insufficient balance."
-                }), 403
-            else:
-                # Generate link
+            Acc = Stripe.Account.modify(
+                StripeAccountId,
+                external_account=Tok["id"],
+                api_key=StripeSECRET_KEY
+            )
 
-                LinkPayload = {
-                    "counterparty_name": Payload["Name"],
-                    "save_counterparty": True,
-                    "account_id": "<< MyAcountId >>",
-                    "amount": Amount * Price,
-                    "currency": "EUR",
-                    "reference": "Sell %s WalletCoins." % Amount,
-                    "payout_methods": [
-                        "revolut",
-                        "bank_account"
-                    ],
-                    "transfer_reason_code": "cryptocurrency_sold"
+
+            # Save it into the database
+
+            SavePayload = Acc
+            SavePayload["Wallet"] = Session_["Address"]
+            SavePayload = Json.dumps(SavePayload)
+
+            SaveRes = Requests.request(url=CORE + "/bankAccount/create", method="POST", data=SavePayload)
+            
+
+            # Now sell the cryptos
+
+            SellPayload = {
+                "PrivKey": Session_["PrivateKey"],
+                "Address": Session_["Address"],
+                "Amount": Amount
+            }
+            SellPayload = Json.dumps(SellPayload)
+            SellRequest = Requests.request(url=CORE + "/wallets/sell", method="POST", data=SellPayload)
+
+
+            if SellRequest.status_code == 200:
+                Session_["Balance"] = SellRequest.json()["result"]["Balance"]
+
+
+                # Record this payout in order to payout the user
+
+                SaveLinkPayload = {
+                    "Wallet": Session_["Address"],
+                    "Destination": StripeAccountId,
+                    "WLLC": Amount,
+                    "Amount": EUR
                 }
-                LinkPayload = Json.dumps(LinkPayload)
-                LinkHeaders = {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Authorization': 'Bearer <TOKEN>'
-                }
-
-                LinkCreate = Requests.request(url="https://b2b.revolut.com/api/1.0/payout-links", method="POST", headers=LinkHeaders, data=LinkPayload)
+                SaveLinkPayload = Json.dumps(SaveLinkPayload)
+                SaveLinkRequest = Requests.request(url=CORE + "/payouts/create", method="POST", data=SaveLinkPayload)
 
 
-                if LinkCreate.status_code == 200:
-                    # Link created, sell walletcoins & send the payout link to user
-
-                    SellPayload = {
-                        "PrivKey": Session_["PrivateKey"],
-                        "Address": Session_["Address"],
-                        "Amount": Amount
-                    }
-                    SellPayload = Json.dumps(SellPayload)
-                    SellRequest = Requests.request(url=CORE + "/wallets/sell", method="POST", data=SellPayload)
+                return redirect(url_for("Blockchain"))
 
 
-                    if SellRequest.status_code == 200:
-                        Session_["Balance"] = SellRequest.json()["result"]["Balance"]
-
-
-                        # Save payout url
-
-                        Link = LinkCreate.json()
-                        SaveLinkPayload = {
-                            "Id": Link["id"],
-                            "Wallet": Session_["Address"],
-                            "Amount": Session_["Balance"]
-                        }
-                        SaveLinkPayload = Json.dumps(SaveLinkPayload)
-                        SaveLinkRequest = Requests.request(url=CORE + "/payouts/create", method="POST", data=SaveLinkPayload)
-
-
-                        return jsonify({
-                            "Url": Link["url"]
-                        }), 200
-                    else:
-                        return jsonify({
-                            "result": "Error while selling your cryptos."
-                        }), 500
-                else:
-                    return jsonify({
-                        "result": "Error while creating payout link."
-                    }), 500
+            return jsonify({
+                "result": "Error while selling your cryptos."
+            }), 500
     
     
 
     if request.method == "GET":
-        if "restore" in request.args:
-            Id = request.args.get("restore")
-
-            return render_template(
-                "Sell.html",
-                Balance=Session_["Balance"],
-                Price=GetPrice(),
-                RestoreId=Id,
-                Session=Session_
-            )
-
-
         return render_template(
             "Sell.html",
             Balance=Session_["Balance"],
