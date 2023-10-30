@@ -4,11 +4,18 @@ from Wallet import Wallet, Transaction
 from Cryptography import Cryptography
 
 import datetime as DateTime
+import stripe as Stripe
 import json as JSON
 import Database
 import os as OS
 
 
+#StripePUBLIC_KEY = "pk_test_51N5EBzHImWZNuXQo8QWI4wAJzHDqQIYUNYf9g5M14dmFGVKnLEOLukHeqLQYxyL7IsS5hCRhn97fJi467pTtjI8a002EtFkSLD"
+#StripeSECRET_KEY = "sk_test_51N5EBzHImWZNuXQojVDpV2LDUIhfDcHnqqC97QDODdbc4LdQjtmtbjHBBZNVIw45VUKUXx9D4a5CuNKJ45rObDy500cHgGYGJa"
+StripePUBLIC_KEY = "pk_live_51N5EBzHImWZNuXQolpw4D5mStlDSOkba9NuvDBDuPl3tRcjHEkJQDle01kR3nMEBRkJeJyHm8vvdVuRK4rhvwxUk008xIcdQ9x"
+StripeSECRET_KEY = "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"
+Stripe.api_key = StripePUBLIC_KEY
+Stripe.secret_key = StripeSECRET_KEY
 
 CORE = Flask(__name__)
 CORE.config.from_mapping(SECRET_KEY = OS.environ.get('SECRET_KEY') or 'dev_key')
@@ -18,10 +25,14 @@ WebsiteDomain = "http://127.0.0.1:3047"
 
 # Cache data = = = = = = = = = = = = = = = = = = =
 
+CompanyHolders = dict()
 Wallets = dict()
 DeletedWallets = []
 PrivateKeys = dict()
 DeletedPrivateKeys = []
+StripeAccounts = dict()
+BankAccounts = dict()
+Payments = dict()
 Payouts = dict()
 Blockchain_ = []
 PriceChart = dict()
@@ -30,14 +41,9 @@ PriceNow : float = Database.GetPrice()
 Vault = Database.Vault()
 
 
-Earnings = {
-    "WLLC": 0,
-    "EUR": 0
-}
-
 # Fees
-Fees_Buy = 0.5 # %
-Fees_Sell = 0.5 # %
+Fees_Buy = 4.34 # %
+Fees_Sell = 1.5 # %
 Fees_Transcate = 0.5 # %
 
 
@@ -361,33 +367,15 @@ def WalletsBuy():
     # Add more WalletCoins on this wallet
 
     Fee = (Amount * Fees_Buy) / 100.0
-    AmountEUR = PriceNow * (Amount - Fee)
-
     Wallets[Address]["Balance"] += Amount - Fee
-    Vault["Cash"] += AmountEUR
 
 
     global Earnings
 
 
-    # Save previous month company earnings first
-
-    if DateTime.datetime.today().day == 1:
-        if not Database.CompanyLastPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month):
-            Payout()
-
-
-            if DateTime.datetime.today().month -1 > 0:
-                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month -1, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
-            else:
-                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year -1, Month=12, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
-
-
-            Earnings["WLLC"] = 0
-            Earnings["EUR"] = 0
+    # Receive a fee
     
-
-    Earnings["WLLC"] += Fee
+    Payout(Amount=Fee)
 
 
     # There are no coins in stock, issue more
@@ -404,7 +392,7 @@ def WalletsBuy():
 
     # Increase the value of WalletCoin
 
-    ChangePrice(Action="Increase", Amount=AmountEUR)
+    ChangePrice()
 
 
     return jsonify({
@@ -448,41 +436,20 @@ def WalletsSell():
             return jsonify({}), 402 # Insufficient Balance
     
 
-    AmountEUR = PriceNow * Amount
-
     Wallets[Address]["Balance"] -= Amount
-    Vault["Cash"] -= AmountEUR
-    Vault["Owned"] -= Amount
-
-
-    # Sell fees is 0,5%, so user loses 0,5% of the cash he received
-
-    global Earnings
-
-
-    # Save previous month company earnings first
-
-    if DateTime.datetime.today().day == 1:
-        if not Database.CompanyLastPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month):
-            Payout()
-
-
-            if DateTime.datetime.today().month -1 > 0:
-                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month -1, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
-            else:
-                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year -1, Month=12, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
-
-
-            Earnings["WLLC"] = 0
-            Earnings["EUR"] = 0
     
+    AmountWithFees = (Amount * Fees_Sell) / 100.0
+    Vault["Owned"] -= Amount - AmountWithFees
 
-    Earnings["EUR"] += ((AmountEUR * Fees_Sell) / 100.0)
+
+    # Receive a fee
+    
+    Payout(Amount=AmountWithFees)
 
 
     # Decrease the value of WalletCoin
 
-    ChangePrice(Action="Decrease", Amount=AmountEUR)
+    ChangePrice()
 
 
     return jsonify({
@@ -493,23 +460,113 @@ def WalletsSell():
 
 
 
-# P A Y O U T S = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+# S T R I P E A C C O U N T S = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-@CORE.route("/payouts/create", methods=["POST"])
-def CreatePayout():
+@CORE.route("/stripeAccount/create", methods=["POST"])
+def CreateStripeAccount():
     Payload = JSON.loads(request.get_data())
-    Id = Payload["Id"]
+    Wallet = Payload["Wallet"]
+    StripeAccounts[Wallet] = Payload
+    
+    
+    return jsonify({
+        "result": StripeAccounts[Wallet]
+    }), 200
+
+
+
+@CORE.route("/stripeAccount/<string:Wallet>", methods=["GET"])
+def GetStripeAccount(Wallet):
+    if Wallet in StripeAccounts:
+        return jsonify({
+            "result": StripeAccounts[Wallet]
+        }), 200
+    
+
+    Account = Database.FindStripeAccount(Address=Wallet)
+
+
+    if len(Account) > 0:
+        return jsonify({
+            "result": Account
+        }), 200
+    
+    
+    return jsonify({}), 404
+
+
+
+# B A N K A C C O U N T S = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+@CORE.route("/bankAccount/create", methods=["POST"])
+def CreateBankAccount():
+    Payload = JSON.loads(request.get_data())
     Wallet = Payload["Wallet"]
 
 
-    if not Wallet in Payouts:
-        Payouts[Wallet] = []
+    if not Wallet in BankAccounts:
+        BankAccounts[Wallet] = []
     
 
-    Payouts[Wallet].append({
+    Account = dict()
+
+    for P in Payload:
+        Account[P] = Payload[P]
+
+    BankAccounts[Wallet].append(Account)
+
+    return jsonify({
+        "result": BankAccounts[Wallet]
+    }), 200
+
+
+
+@CORE.route("/bankAccounts/<string:Wallet>", methods=["GET"])
+def GetBankAccounts(Wallet):
+    WalletBank = []
+
+
+    if Wallet in BankAccounts:
+        WalletBank = BankAccounts[Wallet]
+    
+
+    Accounts = Database.FindBankAccounts(Address=Wallet)
+
+
+    if len(Accounts) > 0:
+        WalletBank += Accounts
+
+
+        return jsonify({
+            "result": WalletBank
+        }), 200
+    
+    
+    return jsonify({
+        "result": []
+    }), 200
+
+
+
+# P A Y M E N T S = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+@CORE.route("/payments/create", methods=["POST"])
+def CreatePayment():
+    Payload = JSON.loads(request.get_data())
+    Crypto = Cryptography()
+    Id = Crypto.GenerateRandomKey(Count=10, RemoveSelected=False) # Payload["Id"]
+    Wallet = Payload["Wallet"]
+
+
+    if not Wallet in Payments:
+        Payments[Wallet] = []
+    
+
+    NewPayment = {
         "Id": Id,
         "Wallet": Wallet,
         "Amount": Payload["Amount"],
+        "Status": "Authorizing",
         "Date": {
             "Year": DateTime.datetime.today().year,
             "Month": DateTime.datetime.today().minute,
@@ -518,10 +575,146 @@ def CreatePayout():
             "Minute": DateTime.datetime.today().minute,
             "Second": DateTime.datetime.today().second
         }
-    })
+    }
+    Payments[Wallet].append(NewPayment)
+
 
     return jsonify({
-        "result": Payouts[Wallet][Id]
+        "result": NewPayment
+    }), 200
+
+
+
+@CORE.route("/payments/<string:Wallet>", methods=["GET"])
+def GetPayments(Wallet):
+    WalletPayments = []
+
+
+    if Wallet in Payments:
+        WalletPayments = Payments[Wallet]
+    
+
+    Payments_ = Database.FindWalletPayments(Address=Wallet)
+
+
+    if len(Payments_) > 0:
+        WalletPayments = Payments_ + WalletPayments
+
+
+        return jsonify({
+            "result": WalletPayments
+        }), 200
+    
+    
+    return jsonify({
+        "result": []
+    }), 200
+
+
+
+@CORE.route("/payments/<string:Wallet>/<string:Id>", methods=["GET"])
+def WalletGetPayments(Wallet, Id):
+    if Wallet in Payments:
+        for I in range(0, len(Payments[Wallet])):
+            if Payments[Wallet][I]["Id"] == Id:
+                return jsonify({
+                    "result": Payments[Wallet][I]
+                }), 200
+    
+
+    Payment = Database.FindWalletPayment(Address=Wallet, Id=Id)
+
+
+    if len(Payment) > 0:
+        return jsonify({
+            "result": Payment
+        }), 200
+    
+    
+    return jsonify({
+        "result": []
+    }), 200
+
+
+
+@CORE.route("/payments/<string:Wallet>/<string:Id>/status", methods=["POST"])
+def WalletUpdatePaymentStatus(Wallet, Id):
+    Payload = JSON.loads(request.get_data())
+
+
+    if Wallet in Payments:
+        for I in range(0, len(Payments[Wallet])):
+            if Payments[Wallet][I]["Id"] == Id:
+                Payments[Wallet][I]["Status"] = Payload["Status"]
+
+                return jsonify({}), 200
+    
+
+    Payments_ = Database.UpdateWalletPaymentStatus(CachePayments=Payments, Address=Wallet, Id=Id, Status=Payload["Status"])
+    Payments[Wallet] = Payments_
+
+    return jsonify({}), 200
+
+
+
+@CORE.route("/payments/<string:Wallet>/last", methods=["GET"])
+def GetLastPayment(Wallet):
+    if Wallet in Payments:
+        return jsonify({
+            "result": Payments[Wallet][len(Payments[Wallet]) -1]
+        }), 200
+    
+
+    Payments_ = Database.FindWalletPayments(Address=Wallet)
+
+
+    if len(Payments_) > 0:
+        return jsonify({
+            "result": Payments_[len(Payments_) -1]
+        }), 200
+    
+    
+    return jsonify({
+        "result": []
+    }), 200
+
+
+
+# P A Y O U T S = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+@CORE.route("/payouts/create", methods=["POST"])
+def CreatePayout():
+    Payload = JSON.loads(request.get_data())
+    Crypto = Cryptography()
+    Id = Crypto.GenerateRandomKey(Count=10, RemoveSelected=False) # Payload["Id"]
+    Wallet = Payload["Wallet"]
+
+
+    if not Wallet in Payouts:
+        Payouts[Wallet] = []
+    
+
+    Payout = {
+        "Id": Id,
+        "Wallet": Wallet,
+        "WLLC": Payload["WLLC"],
+        "Amount": Payload["Amount"],
+        "Destination": Payload["Destination"],
+        "Status": "Pending",
+        "Date": {
+            "Year": DateTime.datetime.today().year,
+            "Month": DateTime.datetime.today().minute,
+            "Day": DateTime.datetime.today().day,
+            "Hour": DateTime.datetime.today().hour,
+            "Minute": DateTime.datetime.today().minute,
+            "Second": DateTime.datetime.today().second
+        }
+    }
+    Payouts[Wallet].append(Payout)
+
+
+    return jsonify({
+        "result": Payout
     }), 200
 
 
@@ -575,6 +768,26 @@ def GetPayout(Wallet, Id):
     return jsonify({
         "result": []
     }), 200
+
+
+
+@CORE.route("/payouts/<string:Wallet>/<string:Id>/status", methods=["POST"])
+def WalletUpdatePayoutStatus(Wallet, Id):
+    Payload = JSON.loads(request.get_data())
+
+
+    if Wallet in Payouts:
+        for I in range(0, len(Payouts[Wallet])):
+            if Payouts[Wallet][I]["Id"] == Id:
+                Payouts[Wallet][I]["Status"] = Payload["Status"]
+
+                return jsonify({}), 200
+    
+
+    Payouts_ = Database.UpdateWalletPayoutStatus(CachePayouts=Payouts, Address=Wallet, Id=Id, Status=Payload["Status"])
+    Payouts[Wallet] = Payouts_
+
+    return jsonify({}), 200
 
 
 
@@ -832,24 +1045,9 @@ def InvoicesExecute():
     global Earnings
 
     
-    # Save previous month company earnings first
-
-    if DateTime.datetime.today().day == 1:
-        if not Database.CompanyLastPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month):
-            Payout()
-
-
-            if DateTime.datetime.today().month -1 > 0:
-                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month -1, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
-            else:
-                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year -1, Month=12, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
-
-
-            Earnings["WLLC"] = 0
-            Earnings["EUR"] = 0
+    # Receive a fee
     
-
-    Earnings["WLLC"] += AmountWithFees
+    Payout(Amount=AmountWithFees)
 
     
     # Validate blockchain and append the new block
@@ -897,10 +1095,19 @@ def InvoicesGet():
 
 # P R I C E = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-def ChangePrice(Action : str, Amount : float):
+def ChangePrice():
     Year = DateTime.datetime.today().year
     Month = DateTime.datetime.today().month
     Day = DateTime.datetime.today().day
+    Cash = Stripe.Balance.retrieve(
+        api_key=StripeSECRET_KEY,
+        stripe_account="acct_1N5EBzHImWZNuXQo"
+    )
+    Cash = Cash["available"][0]["amount"]
+    Cash_ = str(Cash)[0:len(str(Cash))-2]
+    Cents = str(Cash)[:len(str(Cash))-3:-1]
+    Cents = Cents[::-1]
+    Cash = float("%s.%s" % (Cash_, Cents))
 
 
     # Prepare the stats wall for the first price change of the day!
@@ -951,7 +1158,6 @@ def ChangePrice(Action : str, Amount : float):
 
     NewChange = {
         "Price": 0,
-        "Amount": Amount,
         "Date": {
             "Hour": DateTime.datetime.today().hour,
             "Minute": DateTime.datetime.today().minute,
@@ -960,10 +1166,8 @@ def ChangePrice(Action : str, Amount : float):
     }
 
 
-    if Action == "Increase":
-        NewChange["Price"] = ( Vault["Cash"] + Amount ) / Vault["Supply"]
-    else:
-        NewChange["Price"] = ( Vault["Cash"] - Amount ) / Vault["Supply"]
+    Vault["Cash"] = Cash
+    NewChange["Price"] = Vault["Cash"] / Vault["Supply"]
     
     
     PriceChart[Year][Month][Day].append(NewChange)
@@ -989,11 +1193,11 @@ def GetCryptoData():
     return jsonify({
         "result": {
             "Price": PriceNow,
-            "Volume": Stats["Volume"],
+            "MarketCap": Vault["Cash"],
             "Supply": Vault["Supply"],
             "Bought": Vault["Owned"]
         }
-    })
+    }), 200
 
 
 
@@ -1013,7 +1217,6 @@ def GetStats(Queries, List : str):
         with open("database/Price.json", "r") as File:
             Stats = JSON.loads(File.read())
             Stats = Stats["Chart"]
-            Volume = 0
             Total = []
 
 
@@ -1025,7 +1228,6 @@ def GetStats(Queries, List : str):
                         
                         for S in Stats[Year][Month][Day]:
                             Price_ = S["Price"]
-                            Volume += S["Amount"]
                         
 
                         # Search in temporary memory for this day
@@ -1035,7 +1237,6 @@ def GetStats(Queries, List : str):
                                 if int(Day) in PriceChart[int(Year)][int(Month)]:
                                     for S in Stats[int(Year)][int(Month)][int(Day)]:
                                         Price_ = S["Price"]
-                                        Volume += S["Amount"]
 
 
                         Total.append({
@@ -1079,7 +1280,6 @@ def GetStats(Queries, List : str):
                 "ChangePercent": ChangePercent,
                 "Owned": Vault["Owned"],
                 "ForSell": Vault["Supply"] - Vault["Owned"],
-                "Volume": Volume,
                 "MarketCap": Vault["Cash"],
                 "Stats": Total
             }
@@ -1095,7 +1295,6 @@ def GetStats(Queries, List : str):
             with open("database/Price.json", "r") as File:
                 Stats = JSON.loads(File.read())
                 Stats = Stats["Chart"]
-                Volume = 0
                 Annual = []
 
 
@@ -1107,7 +1306,6 @@ def GetStats(Queries, List : str):
                             
                             for S in Stats[Year][Month][Day]:
                                 Price_ = S["Price"]
-                                Volume += S["Amount"]
                             
 
                             # Search in temporary memory for this day
@@ -1117,7 +1315,6 @@ def GetStats(Queries, List : str):
                                     if int(Day) in PriceChart[int(Year)][int(Month)]:
                                         for S in Stats[int(Year)][int(Month)][int(Day)]:
                                             Price_ = S["Price"]
-                                            Volume += S["Amount"]
 
 
                             Annual.append({
@@ -1161,7 +1358,6 @@ def GetStats(Queries, List : str):
                     "ChangePercent": ChangePercent,
                     "Owned": Vault["Owned"],
                     "ForSell": Vault["Supply"] - Vault["Owned"],
-                    "Volume": Volume,
                     "MarketCap": Vault["Cash"],
                     "Stats": Annual
                 }
@@ -1183,7 +1379,6 @@ def GetStats(Queries, List : str):
             with open("database/Price.json", "r") as File:
                 Stats = JSON.loads(File.read())
                 Stats = Stats["Chart"]
-                Volume = 0
                 Daily = []
                 
 
@@ -1191,7 +1386,6 @@ def GetStats(Queries, List : str):
                     if Month in Stats[Year]:
                         for Day in Stats[Year][Month]:
                             for S in Stats[Year][Month][Day]:
-                                Volume += S["Amount"]
 
                                 Daily.append({
                                     "Tag": "%s/%s/%s::" % (str(Year), str(Month), str(Day)) + "%s:%s:%s" % (str(S["Date"]["Hour"]), str(S["Date"]["Minute"]), str(S["Date"]["Second"])),
@@ -1205,7 +1399,6 @@ def GetStats(Queries, List : str):
                                 if int(Month) in PriceChart[int(Year)]:
                                     if int(Day) in PriceChart[int(Year)][int(Month)]:
                                         for S in Stats[int(Year)][int(Month)][int(Day)]:
-                                            Volume += S["Amount"]
 
                                             Daily.append({
                                                 "Tag": "%s/%s/%s::" % (str(Year), str(Month), str(Day)) + "%s:%s:%s" % (str(S["Date"]["Hour"]), str(S["Date"]["Minute"]), str(S["Date"]["Second"])),
@@ -1248,7 +1441,6 @@ def GetStats(Queries, List : str):
                     "ChangePercent": ChangePercent,
                     "Owned": Vault["Owned"],
                     "ForSell": Vault["Supply"] - Vault["Owned"],
-                    "Volume": Volume,
                     "MarketCap": Vault["Cash"],
                     "Stats": Daily
                 }
@@ -1269,7 +1461,6 @@ def GetStats(Queries, List : str):
             with open("database/Price.json", "r") as File:
                 Stats = JSON.loads(File.read())
                 Stats = Stats["Chart"]
-                Volume = 0
                 Hours = []
 
 
@@ -1277,7 +1468,6 @@ def GetStats(Queries, List : str):
                     if Month in Stats[Year]:
                         if Day in Stats[Year][Month]:
                             for S in Stats[Year][Month][Day]:
-                                Volume += S["Amount"]
                                 Hours.append({
                                     "Tag": "%s:%s:%s" % (str(S["Date"]["Hour"]), str(S["Date"]["Minute"]), str(S["Date"]["Second"])),
                                     "Value": S["Price"]
@@ -1289,7 +1479,6 @@ def GetStats(Queries, List : str):
                     if int(Month) in PriceChart[int(Year)]:
                         if int(Day) in PriceChart[int(Year)][int(Month)]:
                             for S in PriceChart[int(Year)][int(Month)][int(Day)]:
-                                Volume += S["Amount"]
                                 Hours.append({
                                     "Tag": "%s:%s:%s" % (str(S["Date"]["Hour"]), str(S["Date"]["Minute"]), str(S["Date"]["Second"])),
                                     "Value": S["Price"]
@@ -1331,7 +1520,6 @@ def GetStats(Queries, List : str):
                     "ChangePercent": ChangePercent,
                     "Owned": Vault["Owned"],
                     "ForSell": Vault["Supply"] - Vault["Owned"],
-                    "Volume": Volume,
                     "MarketCap": Vault["Cash"],
                     "Stats": Hours
                 }
@@ -1345,15 +1533,8 @@ def GetStats(Queries, List : str):
 
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-def Payout():
-    Holders = Database.CompanyHolders()
-    Earnings_ = Database.GetCompanyEarnings()
-    WLLC = Earnings_[0]
-    EUR = Earnings_[1]
-    CompanyPayouts_ = {}
-
-
-    for Holder in Holders:
+def Payout(Amount : float):
+    for Holder in CompanyHolders:
         # Payout in crypto
 
         if not Holder["Wallet"] in Wallets:
@@ -1380,46 +1561,80 @@ def Payout():
 
 
         # Transfer the money
-        Wallets[Holder["Wallet"]]["Balance"] += WLLC / len(Holders)
 
-
-        CompanyPayouts_[Holder["Name"]] = {
-            "Amount": WLLC / len(Holders),
-            "Time": {
-                "Hour": DateTime.datetime.today().hour,
-                "Minute": DateTime.datetime.today().minute,
-                "Second": DateTime.datetime.today().second
-            }
-        }
-
-    Database.SaveCompanyPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month, Body=CompanyPayouts_)
-
-
-    # Payout in euro
+        Wallets[Holder["Wallet"]]["Balance"] += Amount / len(CompanyHolders)
 
 
 
 @CORE.route("/save", methods=["POST"])
 def CacheSave():
-    if DateTime.datetime.today().day == 1:
-        if not Database.CompanyLastPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month):
-            Payout()
+    # Payout the sellers
 
-            if DateTime.datetime.today().month -1 > 0:
-                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month -1, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
-            else:
-                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year -1, Month=12, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
-            
-            Earnings["WLLC"] = 0
-            Earnings["EUR"] = 0
+    for Wallet in Payouts:
+        for Pay in range(0, len(Payouts[Wallet])):
+            if Payouts[Wallet][Pay]["Status"] == "Pending":
+                Destination = Payouts[Wallet][Pay]["Destination"]
 
 
-    Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
-    
-    
+                # Transfer the funds
+
+                Stripe.Transfer.create(
+                    api_key=StripeSECRET_KEY,
+                    amount=Destination,
+                    currency="eur",
+                    destination=Destination
+                )
+
+
+                # Payout
+
+                Stripe.Payout.create(
+                    api_key=StripeSECRET_KEY,
+                    amount=Payouts[Wallet][Pay]["Amount"],
+                    currency="eur",
+                    stripe_account=Destination
+                )
+
+
+    with open("database/WalletPayouts.json", "r") as FileRead:
+        Payouts_ = JSON.loads(FileRead.read())
+
+
+        for Wallet in Payouts_:
+            for Pay in range(0, len(Payouts_[Wallet])):
+                if Payouts_[Wallet][Pay]["Status"] == "Pending":
+                    Destination = Payouts_[Wallet][Pay]["Destination"]
+
+
+                    # Transfer the funds
+
+                    Stripe.Transfer.create(
+                        api_key=StripeSECRET_KEY,
+                        amount=Destination,
+                        currency="eur",
+                        destination=Destination
+                    )
+
+
+                    # Payout
+
+                    Stripe.Payout.create(
+                        api_key=StripeSECRET_KEY,
+                        amount=Payouts_[Wallet][Pay]["Amount"],
+                        currency="eur",
+                        method="instant",
+                        stripe_account=Destination
+                    )
+
+                    Payouts_[Wallet][Pay]["Status"] = "Completed"
+
+
     Database.SavePrice(Price=PriceNow, Cash=Vault["Cash"], Supply=Vault["Supply"], Owned=Vault["Supply"], Chart=PriceChart)
     Database.SaveWallets(Wallets=Wallets, Deleted=DeletedWallets)
     Database.SavePrivateKeys(PrivateKeys=PrivateKeys, Deleted=DeletedPrivateKeys)
+    Database.SaveStripeAccounts(StripeAccounts=StripeAccounts)
+    Database.SaveBankAccounts(BankAccounts=BankAccounts)
+    Database.SaveWalletPayments(Payments=Payments)
     Database.SaveWalletPayouts(Payouts=Payouts)
 
 
@@ -1430,7 +1645,15 @@ def CacheSave():
     PriceChart.clear()
     Wallets.clear()
     PrivateKeys.clear()
+    StripeAccounts.clear()
+    BankAccounts.clear()
+    Payments.clear()
+    Payouts.clear()
     Blockchain_ = []
+
+
+    global CompanyHolders
+    CompanyHolders = Database.CompanyHolders()
 
 
     if "close" in request.args: # Used to stop the program in order to upload a new update without losing any temporary data
@@ -1442,5 +1665,6 @@ def CacheSave():
 
 
 if __name__ == '__main__':
+    CompanyHolders = Database.CompanyHolders()
     CORE.secret_key = 'secret123'
     CORE.run(port=3048, debug=True)

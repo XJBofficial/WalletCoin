@@ -11,125 +11,6 @@ def CompanyHolders():
 
 
 
-def CompanyLastPayout(Year : int, Month : int):
-    with open("database/company/Payouts.json", "r") as File:
-        Data = JSON.loads(File.read())
-        Year = str(Year)
-        Month = str(Month)
-        Exist : bool
-
-            
-        if Year in Data:
-            if Month in Data[Year]:
-                Exist = True
-            else:
-                Exist = False
-        else:
-            Exist = False
-        
-
-        Data.clear()
-        File.close()
-
-        return Exist
-
-
-
-def SaveCompanyPayout(Year : int, Month : int, Body : dict):
-    with open("database/company/Payouts.json", "r") as FileRead:
-        Data = JSON.loads(FileRead.read())
-
-
-        with open("database/company/Payouts.json", "w") as FileWrite:
-            Year = str(Year)
-            Month = str(Month)
-            
-
-            if Year in Data:
-                Data[Year][Month] = Body
-            else:
-                Data[Year] = {
-                    Month: Body
-                }
-            
-
-            FileWrite.write(JSON.dumps(Data, indent=1))
-            
-
-            Data.clear()
-            FileRead.close()
-            FileWrite.close()
-
-
-
-def GetCompanyEarnings():
-    with open("database/company/Earnings.json", "r") as File:
-        Data = JSON.loads(File.read())
-        Earnings = [
-            Data["CurrentEarnings"]["WLLC"],
-            Data["CurrentEarnings"]["EUR"]
-        ]
-
-        Data.clear()
-        File.close()
-
-        return Earnings
-
-
-
-def SaveCompanyEarnings(Year : int, Month : int, Day : int, WLLC : float, EUR : float):
-    with open("database/company/Earnings.json", "r") as FileRead:
-        Data = JSON.loads(FileRead.read())
-
-
-        with open("database/company/Earnings.json", "w") as FileWrite:
-            Year = str(Year)
-            Month = str(Month)
-            Day = str(Day)
-
-            
-            if Year in Data["Stats"]:
-                if Month in Data["Stats"][Year]:
-                    Data["Stats"][Year][Month]["WLLC"] += WLLC
-                    Data["Stats"][Year][Month]["EUR"] += EUR
-                else:
-                    Data["Stats"][Year][Month] = {
-                        "WLLC": WLLC,
-                        "EUR": EUR
-                    }
-            else:
-                Data["Stats"][Year] = {
-                    Month: {
-                        "WLLC": WLLC,
-                        "EUR": EUR
-                    }
-                }
-            
-
-            if Day == "1":
-                if Data["CurrentEarnings"]["Year"] != Year or Data["CurrentEarnings"]["Month"] != Month or Data["CurrentEarnings"]["Day"] != Day:
-                    Data["CurrentEarnings"]["Year"] = Year
-                    Data["CurrentEarnings"]["Month"] = Month
-                    Data["CurrentEarnings"]["Day"] = Day
-                    Data["CurrentEarnings"]["WLLC"] = 0
-                    Data["CurrentEarnings"]["EUR"] = 0
-                else:
-                    Data["CurrentEarnings"]["WLLC"] += WLLC
-                    Data["CurrentEarnings"]["EUR"] += EUR
-            else:
-                Data["CurrentEarnings"]["WLLC"] += WLLC
-                Data["CurrentEarnings"]["EUR"] += EUR
-            
-
-            FileWrite.write(JSON.dumps(Data, indent=1))
-            
-
-            Data.clear()
-            FileRead.close()
-            FileWrite.close()
-
-
-
 def Vault():
     with open("database/Price.json", "r") as File:
         Data = JSON.loads(File.read())
@@ -261,6 +142,180 @@ def SaveWallets(Wallets : dict, Deleted : list):
 
 
 
+def FindStripeAccount(Address : str):
+    with open("database/StripeAccounts.json", "r") as File:
+        StripeAccounts = JSON.loads(File.read())
+
+
+        if Address in StripeAccounts:
+            Wallet = StripeAccounts[Address]
+            
+            StripeAccounts.clear()
+            File.close()
+
+            return Wallet
+        else:
+            StripeAccounts.clear()
+            File.close()
+
+            return {}
+
+
+
+def SaveStripeAccounts(StripeAccounts : dict):
+    with open("database/StripeAccounts.json", "r") as FileRead:
+        Accounts_ = JSON.loads(FileRead.read())
+
+
+        for Wallet in StripeAccounts:
+            for Payout in StripeAccounts[Wallet]:
+                Accounts_[Wallet].append(Payout)
+        
+
+        with open("database/StripeAccounts.json", "w") as FileWrite:
+            FileWrite.write(JSON.dumps(Accounts_, indent=1))
+            FileWrite.close()
+        
+
+        Accounts_.clear()
+        FileRead.close()
+
+
+
+def FindBankAccounts(Address : str):
+    with open("database/BankAccounts.json", "r") as File:
+        BankAccounts = JSON.loads(File.read())
+
+
+        if Address in BankAccounts:
+            Wallet = BankAccounts[Address]
+            
+            BankAccounts.clear()
+            File.close()
+
+            return Wallet
+        else:
+            BankAccounts.clear()
+            File.close()
+
+            return {}
+
+
+
+def SaveBankAccounts(BankAccounts : dict):
+    with open("database/BankAccounts.json", "r") as FileRead:
+        Accounts_ = JSON.loads(FileRead.read())
+
+
+        for Wallet in BankAccounts:
+            for Payout in BankAccounts[Wallet]:
+                Accounts_[Wallet].append(Payout)
+        
+
+        with open("database/BankAccounts.json", "w") as FileWrite:
+            FileWrite.write(JSON.dumps(Accounts_, indent=1))
+            FileWrite.close()
+        
+
+        Accounts_.clear()
+        FileRead.close()
+
+
+
+def FindWalletPayment(Address : str, Id : str):
+    with open("database/WalletPayments.json", "r") as File:
+        Payments = JSON.loads(File.read())
+
+
+        if Address in Payments:
+            Wallet = Payments[Address]
+            
+            Payments.clear()
+            File.close()
+
+
+            for I in range(0, len(Wallet)):
+                if Wallet[I]["Id"] == Id:
+                    return Wallet[Id]
+            
+            return {}
+        else:
+            Payments.clear()
+            File.close()
+
+            return {}
+
+
+
+def UpdateWalletPaymentStatus(CachePayments : list, Address : str, Id : str, Status : str):
+    with open("database/WalletPayments.json", "r") as File:
+        Payments = JSON.loads(File.read())
+
+
+        if Address in Payments:
+            Wallet = Payments[Address]
+            
+            Payments.clear()
+            File.close()
+
+
+            for I in range(0, len(Wallet)):
+                if Wallet[I]["Id"] == Id:
+                    Wallet[I]["Status"] = Status
+                    return Wallet + CachePayments
+            
+            return []
+        else:
+            Payments.clear()
+            File.close()
+
+            return []
+
+
+
+def FindWalletPayments(Address : str):
+    with open("database/WalletPayments.json", "r") as File:
+        Payments = JSON.loads(File.read())
+
+
+        if Address in Payments:
+            Wallet = Payments[Address]
+            
+            Payments.clear()
+            File.close()
+
+            return Wallet
+        else:
+            Payments.clear()
+            File.close()
+
+            return {}
+
+
+
+def SaveWalletPayments(Payments : dict):
+    with open("database/WalletsPayments.json", "r") as FileRead:
+        Payments_ = JSON.loads(FileRead.read())
+
+
+        for Wallet in Payments:
+            if not Wallet in Payments_:
+                Payments_[Wallet] = []
+
+            for Payout in Payments[Wallet]:
+                Payments_[Wallet].append(Payout)
+        
+
+        with open("database/WalletPayments.json", "w") as FileWrite:
+            FileWrite.write(JSON.dumps(Payments_, indent=1))
+            FileWrite.close()
+        
+
+        Payments_.clear()
+        FileRead.close()
+
+
+
 def FindWalletPayout(Address : str, Id : str):
     with open("database/WalletPayouts.json", "r") as File:
         Payouts = JSON.loads(File.read())
@@ -306,12 +361,41 @@ def FindWalletPayouts(Address : str):
 
 
 
+def UpdateWalletPayoutStatus(CachePayouts : list, Address : str, Id : str, Status : str):
+    with open("database/WalletPayouts.json", "r") as File:
+        Payouts = JSON.loads(File.read())
+
+
+        if Address in Payouts:
+            Wallet = Payouts[Address]
+            
+            Payouts.clear()
+            File.close()
+
+
+            for I in range(0, len(Wallet)):
+                if Wallet[I]["Id"] == Id:
+                    Wallet[I]["Status"] = Status
+                    return Wallet + CachePayouts
+            
+            return []
+        else:
+            Payouts.clear()
+            File.close()
+
+            return []
+
+
+
 def SaveWalletPayouts(Payouts : dict):
     with open("database/WalletsPayouts.json", "r") as FileRead:
         Payouts_ = JSON.loads(FileRead.read())
 
 
         for Wallet in Payouts:
+            if not Wallet in Payouts_:
+                Payouts_[Wallet] = []
+
             for Payout in Payouts[Wallet]:
                 Payouts_[Wallet].append(Payout)
         
@@ -321,7 +405,7 @@ def SaveWalletPayouts(Payouts : dict):
             FileWrite.close()
         
 
-        Payouts.clear()
+        Payouts_.clear()
         FileRead.close()
 
 
