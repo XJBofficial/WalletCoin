@@ -1,0 +1,17 @@
+{
+  "name": "wallet_coin_api",
+  "version": "1.0.0",
+  "description": "WalleCoin API Server.",
+  "main": "API.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "API.js"
+  },
+  "author": "XJB",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "node-fetch": "^3.3.2",
+    "xhr2": "^0.2.1"
+  }
+}
