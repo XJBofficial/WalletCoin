@@ -20,7 +20,7 @@ Stripe.secret_key = StripeSECRET_KEY
 CORE = Flask(__name__)
 CORE.config.from_mapping(SECRET_KEY = OS.environ.get('SECRET_KEY') or 'dev_key')
 
-WebsiteDomain = "http://127.0.0.1:3047"
+WebsiteDomain = "https://walletcoincrypto.com"
 
 
 # Cache data = = = = = = = = = = = = = = = = = = =
@@ -373,7 +373,7 @@ def WalletsBuy():
     global Earnings
 
 
-    # Receive a fee
+    # Developer receive a fee
     
     Payout(Amount=Fee)
 
@@ -381,8 +381,7 @@ def WalletsBuy():
     # There are no coins in stock, issue more
 
     if Vault["Supply"] - Vault["Owned"] < Amount:
-        NewAmount = Amount + 1000
-        Vault["Supply"] += NewAmount
+        Vault["Supply"] += Amount
     
 
     # Increase the owned coins by the purchased amount of coins
@@ -442,7 +441,7 @@ def WalletsSell():
     Vault["Owned"] -= Amount - AmountWithFees
 
 
-    # Receive a fee
+    # Developer receive a fee
     
     Payout(Amount=AmountWithFees)
 
@@ -784,7 +783,7 @@ def WalletUpdatePayoutStatus(Wallet, Id):
                 return jsonify({}), 200
     
 
-    Payouts_ = Database.UpdateWalletPayoutStatus(CachePayouts=Payouts, Address=Wallet, Id=Id, Status=Payload["Status"])
+    Payouts_ = Database.UpdateWalletPayoutStatus(CachePayouts=Payouts[Wallet], Address=Wallet, Id=Id, Status=Payload["Status"])
     Payouts[Wallet] = Payouts_
 
     return jsonify({}), 200
@@ -1103,7 +1102,7 @@ def ChangePrice():
         api_key=StripeSECRET_KEY,
         stripe_account="acct_1N5EBzHImWZNuXQo"
     )
-    Cash = Cash["available"][0]["amount"]
+    Cash = Cash["available"][0]["amount"] + Cash["pending"][0]["amount"]
     Cash_ = str(Cash)[0:len(str(Cash))-2]
     Cents = str(Cash)[:len(str(Cash))-3:-1]
     Cents = Cents[::-1]
@@ -1566,34 +1565,47 @@ def Payout(Amount : float):
 
 
 
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
 @CORE.route("/save", methods=["POST"])
 def CacheSave():
     # Payout the sellers
+
+    Cash = Stripe.Balance.retrieve(
+        api_key=StripeSECRET_KEY,
+        stripe_account="acct_1N5EBzHImWZNuXQo"
+    )
+    Cash = Cash["available"][0]["amount"]
+
 
     for Wallet in Payouts:
         for Pay in range(0, len(Payouts[Wallet])):
             if Payouts[Wallet][Pay]["Status"] == "Pending":
                 Destination = Payouts[Wallet][Pay]["Destination"]
+                Amount = int(Payouts[Wallet][Pay]["Amount"] * 100)
 
 
-                # Transfer the funds
+                if Cash >= Amount:
+                    # Transfer the funds
 
-                Stripe.Transfer.create(
-                    api_key=StripeSECRET_KEY,
-                    amount=Destination,
-                    currency="eur",
-                    destination=Destination
-                )
+                    Stripe.Transfer.create(
+                        api_key=StripeSECRET_KEY,
+                        amount=Amount,
+                        currency="eur",
+                        destination=Destination
+                    )
 
 
-                # Payout
+                    # Payout
 
-                Stripe.Payout.create(
-                    api_key=StripeSECRET_KEY,
-                    amount=Payouts[Wallet][Pay]["Amount"],
-                    currency="eur",
-                    stripe_account=Destination
-                )
+                    Stripe.Payout.create(
+                        api_key=StripeSECRET_KEY,
+                        amount=Amount,
+                        currency="eur",
+                        stripe_account=Destination
+                    )
+
+                    Cash -= Amount
 
 
     with open("database/WalletPayouts.json", "r") as FileRead:
@@ -1604,29 +1616,32 @@ def CacheSave():
             for Pay in range(0, len(Payouts_[Wallet])):
                 if Payouts_[Wallet][Pay]["Status"] == "Pending":
                     Destination = Payouts_[Wallet][Pay]["Destination"]
+                    Amount = int(Payouts_[Wallet][Pay]["Amount"] * 100)
 
 
-                    # Transfer the funds
+                    if Cash >= Amount:
+                        # Transfer the funds
 
-                    Stripe.Transfer.create(
-                        api_key=StripeSECRET_KEY,
-                        amount=Destination,
-                        currency="eur",
-                        destination=Destination
-                    )
+                        Stripe.Transfer.create(
+                            api_key=StripeSECRET_KEY,
+                            amount=Amount,
+                            currency="eur",
+                            destination=Destination
+                        )
 
 
-                    # Payout
+                        # Payout
 
-                    Stripe.Payout.create(
-                        api_key=StripeSECRET_KEY,
-                        amount=Payouts_[Wallet][Pay]["Amount"],
-                        currency="eur",
-                        method="instant",
-                        stripe_account=Destination
-                    )
+                        Stripe.Payout.create(
+                            api_key=StripeSECRET_KEY,
+                            amount=Amount,
+                            currency="eur",
+                            method="instant",
+                            stripe_account=Destination
+                        )
 
-                    Payouts_[Wallet][Pay]["Status"] = "Completed"
+                        Payouts_[Wallet][Pay]["Status"] = "Completed"
+                        Cash -= Amount
 
 
     Database.SavePrice(Price=PriceNow, Cash=Vault["Cash"], Supply=Vault["Supply"], Owned=Vault["Supply"], Chart=PriceChart)

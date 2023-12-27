@@ -168,8 +168,7 @@ def SaveStripeAccounts(StripeAccounts : dict):
 
 
         for Wallet in StripeAccounts:
-            for Payout in StripeAccounts[Wallet]:
-                Accounts_[Wallet].append(Payout)
+            Accounts_[Wallet] = StripeAccounts[Wallet]
         
 
         with open("database/StripeAccounts.json", "w") as FileWrite:
@@ -208,6 +207,9 @@ def SaveBankAccounts(BankAccounts : dict):
 
 
         for Wallet in BankAccounts:
+            if not Wallet in Accounts_:
+                Accounts_[Wallet] = []
+
             for Payout in BankAccounts[Wallet]:
                 Accounts_[Wallet].append(Payout)
         
@@ -294,7 +296,7 @@ def FindWalletPayments(Address : str):
 
 
 def SaveWalletPayments(Payments : dict):
-    with open("database/WalletsPayments.json", "r") as FileRead:
+    with open("database/WalletPayments.json", "r") as FileRead:
         Payments_ = JSON.loads(FileRead.read())
 
 
@@ -388,7 +390,7 @@ def UpdateWalletPayoutStatus(CachePayouts : list, Address : str, Id : str, Statu
 
 
 def SaveWalletPayouts(Payouts : dict):
-    with open("database/WalletsPayouts.json", "r") as FileRead:
+    with open("database/WalletPayouts.json", "r") as FileRead:
         Payouts_ = JSON.loads(FileRead.read())
 
 
