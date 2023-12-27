@@ -448,8 +448,8 @@ Server.post("/api/webPayments", (req, res) => {
 
 
 Server.get("/api/webPayments", (req, res) => {
-    var { seller } = req.headers
-    var { invoice } = req.headers
+    var { seller } = req.query;
+    var { invoice } = req.query;
     var HTTP = new XMLHttpRequest();
     var Payload = {
         "Seller": seller,
