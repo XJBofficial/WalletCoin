@@ -299,28 +299,11 @@ def WalletsTransaction():
 
     Wallets[Recipient]["Balance"] += Amount
     Wallets[SenderAddress]["Balance"] -= AmountFees
-
-    global Earnings
-
-
-    # Save previous month company earnings first
-
-    if DateTime.datetime.today().day == 1:
-        if not Database.CompanyLastPayout(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month):
-            Payout()
-
-
-            if DateTime.datetime.today().month -1 > 0:
-                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year, Month=DateTime.datetime.today().month -1, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
-            else:
-                Database.SaveCompanyEarnings(Year=DateTime.datetime.today().year -1, Month=12, Day=DateTime.datetime.today().day, WLLC=Earnings["WLLC"], EUR=Earnings["EUR"])
-
-
-            Earnings["WLLC"] = 0
-            Earnings["EUR"] = 0
     
 
-    Earnings["WLLC"] += AmountWithFees
+    # Developer receive a fee
+    
+    Payout(Amount=AmountWithFees)
 
     
     # Validate blockchain and append the new block
@@ -368,9 +351,6 @@ def WalletsBuy():
 
     Fee = (Amount * Fees_Buy) / 100.0
     Wallets[Address]["Balance"] += Amount - Fee
-
-
-    global Earnings
 
 
     # Developer receive a fee
