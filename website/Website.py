@@ -23,7 +23,8 @@ WEB.config.from_mapping(SECRET_KEY = OS.environ.get('SECRET_KEY') or 'dev_key')
 Session_ = session
 
 CORE = "http://127.0.0.1:3048"
-DOMAIN = "http://127.0.0.1:3047"
+API_CORE = "http://127.0.0.1:3049"
+DOMAIN = "https://walletcoincrypto.com"
 
 
 # Wrap to define if user has connected a wallet
@@ -204,6 +205,36 @@ def WalletCreate():
                     "transfers": {
                         "requested": True
                     }
+                }
+            )
+
+            Stripe.Account.modify(
+                api_key=StripeSECRET_KEY,
+                stripe_account=Account["id"],
+                business_type="individual",
+                business_profile={
+                    "mcc": "5817",
+                    "url": "https://www.youtube.com/channel/UC1nPOWMNYGw3ERLHYH64NSg"
+                },
+                individual={
+                    "address": {
+                        "city": "Athens-Greece",
+                        "line1": "Πογραδετσ",
+                        "postal_code": "12136"
+                    },
+                    "dob": {
+                        "day": 5,
+                        "month": 2,
+                        "year": 2005
+                    },
+                    "email": "makegamesandsites@gmail.com",
+                    "first_name": "Konstantinos",
+                    "last_name": "Papapanagiotou",
+                    "phone": "+306970351652"
+                },
+                tos_acceptance={
+                    "date": int(Time.time()),
+                    "ip": Requests.get("https://api.ipify.org").text
                 }
             )
 
@@ -408,31 +439,19 @@ def Transaction():
 def Buy():
     if request.method == "POST":
         Payload = request.form
-        Currency = Payload["Currency"]
         Amount = int(float(Payload["Amount"]))
         EUR = Amount
 
 
-        if Currency == "EUR":
-            # Convert those euros in walletcoins
-            Amount = Amount * GetPrice()
+        # Convert those euros in walletcoins
+        Amount = Amount / GetPrice()
 
-            # Check if user broke the limits
+        # Check if user broke the limits
 
-            if Amount < 10 or Amount > 100000:
-                return jsonify({
-                    "result": "Min 10 €, Max 100,000 €."
-                }), 400
-        else:
-            # Check if user broke the limits
-
-            WLLC = Amount * GetPrice()
-            EUR = WLLC
-
-            if EUR < 10 or EUR > 100000:
-                return jsonify({
-                    "result": "Min 10 €, Max 100,000 €."
-                }), 400
+        if EUR < 10 or EUR > 100000:
+            return jsonify({
+                "result": "Min 10 €, Max 100,000 €."
+            }), 400
 
 
         # Record this payment
@@ -497,15 +516,10 @@ def Buy():
                         Payload = {
                             "PrivKey": Session_["PrivateKey"],
                             "Address": Session_["Address"],
-                            "Amount": Res["Amount"] * GetPrice()
+                            "Amount": Res["Amount"] / GetPrice()
                         }
                         Payload = Json.dumps(Payload)
                         BuyRequest = Requests.request(url=CORE + "/wallets/buy", method="POST", data=Payload)
-
-
-                        if BuyRequest.status_code == 200:
-                            Session_["Balance"] = BuyRequest.json()["result"]["Balance"]
-                            return redirect(url_for("Blockchain"))
 
 
                         # Update the payment status
@@ -515,6 +529,11 @@ def Buy():
                         }
                         UpdatePaymentPayload = Json.dumps(UpdatePaymentPayload)
                         UpdatePayment = Requests.request(url=CORE + "/payments/%s/%s/status" % (Session_["Address"], Args.get("payment")), method="POST", data=UpdatePaymentPayload)
+
+
+                        if BuyRequest.status_code == 200:
+                            Session_["Balance"] = BuyRequest.json()["result"]["Balance"]
+                            return redirect(url_for("Blockchain"))
 
 
         return render_template(
@@ -533,29 +552,19 @@ def Sell():
         # Payout user normally
 
         Payload = Json.loads(request.get_data())
-
-        Currency = Payload["Currency"]
         Amount = Payload["Amount"]
         Price = GetPrice()
 
 
         # Check if user broke the limits
 
-        if Currency == "EUR":
-            if Amount < 10:
-                return jsonify({
-                    "result": "Min 10 €."
-                }), 400
+        if Amount < 10:
+            return jsonify({
+                "result": "Min 10 €."
+            }), 400
 
-            # Convert those euros in walletcoins
-            Amount = Amount / Price
-        else:
-            WLLC = Amount * Price
-
-            if WLLC < 10:
-                return jsonify({
-                    "result": "Min 10 €."
-                }), 400
+        # Convert those euros in walletcoins
+        Amount = Amount / Price
         
 
         # Sell walletcoins and send to user his payout link
@@ -574,7 +583,7 @@ def Sell():
             StripeAccountIdRequest = Requests.request(url=CORE + "/stripeAccount/" + Session_["Address"], method="GET")
 
             if StripeAccountIdRequest.status_code == 200:
-                StripeAccountId = StripeAccountIdRequest.json()["result"]["id"]
+                StripeAccountId = StripeAccountIdRequest.json()["result"]["StripeId"]
             else:
                 return jsonify({}), 500
 
@@ -982,6 +991,235 @@ def TermsAndPrivacy():
 
 
 
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+# API
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+@WEB.route("/api/price")
+def APIPrice():
+    Res = Requests.request(url=API_CORE + "/api/price", method="GET")
+    return jsonify(Res.json()), Res.status_code
+
+
+
+@WEB.route("/api/price/chart")
+def APIPriceChart():
+    List = request.args.get("list")
+    Res = None
+
+
+    if List == "months":
+        Year = request.args.get("year")
+
+        if not Year:
+            return jsonify({
+                "result": {
+                    "message": "Missing arguments",
+                    "status": 400
+                }
+            }), 400
+
+        Res = Requests.request(url=API_CORE + "/api/price/chart?list=months&year=%s" % Year, method="GET")
+    
+    
+    if List == "days":
+        Year = request.args.get("year")
+        Month = request.args.get("month")
+
+        if not Year or not Month:
+            return jsonify({
+                "result": {
+                    "message": "Missing arguments",
+                    "status": 400
+                }
+            }), 400
+
+        Res = Requests.request(url=API_CORE + "/api/price/chart?list=days&year=%s&month=%s" % (Year, Month), method="GET")
+
+
+    if List == "hours":
+        Year = request.args.get("year")
+        Month = request.args.get("month")
+        Day = request.args.get("day")
+
+        if not Year or not Month or not Day:
+            return jsonify({
+                "result": {
+                    "message": "Missing arguments",
+                    "status": 400
+                }
+            }), 400
+
+        Res = Requests.request(url=API_CORE + "/api/price/chart?list=hours&year=%s&month=%s&day=%s" % (Year, Month, Day), method="GET")
+
+
+    return jsonify(Res.json()), Res.status_code
+
+
+
+@WEB.route("/api/wallet/auth", methods=["POST"])
+def APIWalletAuth():
+    Payload = Json.loads(request.get_data())
+
+    if not "private_key" in Payload or not "secret_phrase" in Payload or not "wallet" in Payload or not "api_key" in Payload:
+        return jsonify({
+            "result": {
+                "message": "Missing arguments",
+                "status": 400
+            }
+        }), 400
+
+
+    NewPayload = {
+        "private_key": Payload["private_key"],
+        "secret_phrase": Payload["secret_phrase"],
+        "wallet": Payload["wallet"],
+        "api_key": Payload["api_key"]
+    }
+
+    Res = Requests.request(url=API_CORE + "/api/wallet/auth", method="POST", data=NewPayload)
+    return jsonify(Res.json()), Res.status_code
+
+
+
+@WEB.route("/api/wallet/transaction", methods=["POST"])
+def APIWalletTransaction():
+    Payload = Json.loads(request.get_data())
+
+    if not "private_key" in Payload or not "recipient" in Payload or not "amount" in Payload or not "wallet" in Payload or not "api_key" in Payload:
+        return jsonify({
+            "result": {
+                "message": "Missing arguments",
+                "status": 400
+            }
+        }), 400
+
+
+    NewPayload = {
+        "private_key": Payload["private_key"],
+        "recipient": Payload["recipient"],
+        "amount": Payload["amount"],
+        "wallet": Payload["wallet"],
+        "api_key": Payload["api_key"]
+    }
+
+    Res = Requests.request(url=API_CORE + "/api/wallet/transaction", method="POST", data=NewPayload)
+    return jsonify(Res.json()), Res.status_code
+
+
+
+@WEB.route("/api/wallet/withdraw", methods=["POST"])
+def APIWalletWithdraw():
+    Payload = Json.loads(request.get_data())
+
+    if not "private_key" in Payload or not "withdraw_to" in Payload or not "amount" in Payload or not "wallet" in Payload or not "api_key" in Payload:
+        return jsonify({
+            "result": {
+                "message": "Missing arguments",
+                "status": 400
+            }
+        }), 400
+
+
+    NewPayload = {
+        "private_key": Payload["private_key"],
+        "withdraw_to": Payload["withdraw_to"],
+        "amount": Payload["amount"],
+        "wallet": Payload["wallet"],
+        "api_key": Payload["api_key"]
+    }
+
+    Res = Requests.request(url=API_CORE + "/api/wallet/withdraw", method="POST", data=NewPayload)
+    return jsonify(Res.json()), Res.status_code
+
+
+
+@WEB.route("/api/wallet/deposit", methods=["POST"])
+def APIWalletDeposit():
+    Payload = Json.loads(request.get_data())
+
+    if not "private_key" in Payload or not "deposit_to" in Payload or not "amount" in Payload or not "wallet" in Payload or not "api_key" in Payload:
+        return jsonify({
+            "result": {
+                "message": "Missing arguments",
+                "status": 400
+            }
+        }), 400
+
+
+    NewPayload = {
+        "private_key": Payload["private_key"],
+        "deposit_to": Payload["deposit_to"],
+        "amount": Payload["amount"],
+        "wallet": Payload["wallet"],
+        "api_key": Payload["api_key"]
+    }
+
+    Res = Requests.request(url=API_CORE + "/api/wallet/deposit", method="POST", data=NewPayload)
+    return jsonify(Res.json()), Res.status_code
+
+
+
+@WEB.route("/api/webPayments", methods=["POST", "GET"])
+def APIWebPayments():
+    if request.method == "POST":
+        Payload = Json.loads(request.get_data())
+
+
+        if not "description" in Payload or not "amount" in Payload or not "success_url" in Payload or not "failed_url" in Payload or not "cancel_url" in Payload:
+            return jsonify({
+                "result": {
+                    "message": "Missing arguments",
+                    "status": 400
+                }
+            }), 400
+
+
+        if not "private_key" in Payload or not "wallet" in Payload or not "api_key" in Payload:
+            return jsonify({
+                "result": {
+                    "message": "Missing arguments",
+                    "status": 400
+                }
+            }), 400
+
+
+        NewPayload = {
+            "description": Payload["description"],
+            "amount": Payload["amount"],
+            "success_url": Payload["success_url"],
+            "failed_url": Payload["failed_url"],
+            "cancel_url": Payload["cancel_url"],
+            "private_key": Payload["private_key"],
+            "wallet": Payload["wallet"],
+            "api_key": Payload["api_key"]
+        }
+
+        Res = Requests.request(url=API_CORE + "/api/webPayments", method="POST", data=NewPayload)
+        return jsonify(Res.json()), Res.status_code
+
+
+    if request.method == "GET":
+        Seller = request.args.get("seller")
+        Invoice = request.args.get("invoice")
+
+
+        if not Seller or not Invoice:
+            return jsonify({
+                "result": {
+                    "message": "Missing arguments",
+                    "status": 400
+                }
+            }), 400
+        
+
+        Res = Requests.request(url=API_CORE + "/api/webPayments?seller=%s&invoice=%s" % (Seller, Invoice), method="GET")
+        return jsonify(Res.json()), Res.status_code
+
+
+
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
 if __name__ == '__main__':
     WEB.secret_key = 'secret123'
-    WEB.run(port=3047, debug=True)
+    WEB.run(host="0.0.0.0", port=3047, debug=True)
