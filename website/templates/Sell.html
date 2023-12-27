@@ -43,7 +43,6 @@
 
   <div class="Amount-DIV">
     <input class="Input" id="Amount" type="number" name="Amount" placeholder="Amount" required>
-    <button class="CurrencyChangeButton" onclick="ChangeCurrency();"></button>
   </div>
 
 
@@ -64,31 +63,16 @@
     const BankAccount_AccountNumber = document.querySelector("#BankAccount #AccountNumber");
     const BankAccount_IBAN = document.querySelector("#BankAccount #IBAN");
     const Amount = document.querySelector("#Amount");
-    const CurrencyChangeButton = document.querySelector(".CurrencyChangeButton");
     const CalculatedAmount = document.querySelector(".CalculatedAmount");
     const Notification = document.querySelector(".Notification");
     const SellButton = document.querySelector(".SellWalletCoins");
 
-    let Currency = "EUR";
     let Price = parseFloat("{{ Price }}");
     let EuropeanCitizen = false;
 
 
-    ChangeCurrency();
     EuropeanCitizenCheck();
     
-
-
-    function ChangeCurrency() {
-      CurrencyChangeButton.innerHTML = Currency;
-
-      if ( Currency == "EUR" ) {
-        Currency = "WLLC";
-      } else {
-        Currency = "EUR";
-      }
-    }
-
 
     function EuropeanCitizenCheckChange() {
       if ( EuropeanCitizenCheck.checked == true ) {
@@ -133,14 +117,8 @@
 
 
     function Min() {
-      if ( Currency == "EUR" ) {
-        if ( Amount.value >= 10 ) {
-          return true;
-        }
-      } else {
-        if ( Amount.value * Price >= 10 ) {
-          return true;
-        }
+      if ( Amount.value >= 10 ) {
+        return true;
       }
 
       return false;
@@ -153,21 +131,15 @@
         let Final = 0;
 
 
-        if ( Currency == "WLLC" ) {
-          // How much euros is those walletcoins
-          Final = Price * Amount.value
-        } else {
-          // How much walletcoins is those euros
-          Final = Amount.value / Price
-        }
-        
+        // How much walletcoins is those euros
+        Final = Amount.value / Price;
 
         // Calculate fees
         var Fee = (Final * 0.5) / 100.0
         Final -= Fee
 
 
-        CalculatedAmount.innerHTML = `= ${Final} ${Currency} ( - ${Fee} Fee )`;
+        CalculatedAmount.innerHTML = `= ${Final} WLLC ( - ${Fee} Fee )`;
       }
     }
     
@@ -192,7 +164,6 @@
 
         
         RequestBody = {
-          "Currency": Currency,
           "Amount": parseFloat(Amount.value),
           "Bank": {
             "Currency": BankAccount_Currency.value,

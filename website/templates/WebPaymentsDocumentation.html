@@ -111,7 +111,7 @@
                 <div class="WebPayments-Request">
                     <label class="WebPayments-Label">Request url:</label>
                     <textarea class="WebPayments-Code" id="WebPayments-CreatePayment-Url">
-POST: https://127.0.0.1:5000/api/webPayments
+POST: https://walletcoincrypto.com/api/webPayments
                     </textarea>
                 </div>
 
@@ -151,7 +151,7 @@ POST: https://127.0.0.1:5000/api/webPayments
 {
     "result": {
         "invoice": "xu36Bi983FtHsd4",
-        "payment_url": "https://127.0.0.1:5000/payments?invoice=xu36Bi983FtHsd4&seller=fyPundefinedvBEkv2TeTx3XjWbHekW1U"
+        "payment_url": "https://walletcoincrypto.com/payments?invoice=xu36Bi983FtHsd4&seller=fyPundefinedvBEkv2TeTx3XjWbHekW1U"
     }
 }
                     </textarea>
@@ -173,18 +173,15 @@ POST: https://127.0.0.1:5000/api/webPayments
                 <div class="WebPayments-Request">
                     <label class="WebPayments-Label">Request url:</label>
                     <textarea class="WebPayments-Code" id="WebPayments-GetPayment-Url">
-GET: https://127.0.0.1:5000/api/webPayments
+GET: https://walletcoincrypto.com/api/webPayments
                     </textarea>
                 </div>
 
 
                 <div class="WebPayments-Request">
-                    <label class="WebPayments-Label">Example Request headers:</label>
+                    <label class="WebPayments-Label">Example Request:</label>
                     <textarea class="WebPayments-Code" id="WebPayments-GetPayment-Body">
-{
-    "invoice": "xu36Bi983FtHsd4",
-    "seller": "fyPundefinedvBEkv2TeTx3XjWbHekW1U"
-}
+https://walletcoincrypto.com/api/webPayments?invoice=xu36Bi983FtHsd4&seller=fyPundefinedvBEkv2TeTx3Xj
                     </textarea>
                 </div>
 
@@ -193,7 +190,7 @@ GET: https://127.0.0.1:5000/api/webPayments
                     <p id="WebPayments-Text">
                         <strong>"invoice"</strong> is the invoice id you receive when the payment Initialized. <strong>"seller"</strong> argument
                         is your wallet address. Because of the acceptable method is <strong>"GET"</strong>, you need to send
-                        the data inside the headers of the request.
+                        the data inside the url queries of the request.
                     </p>
                 </div>
 

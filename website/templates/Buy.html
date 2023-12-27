@@ -22,8 +22,6 @@
 
   <div class="Amount-DIV">
     <input class="Input" id="Amount" type="number" name="Amount" placeholder="Amount" required>
-    <input class="Input" id="CurrencyInput" type="hidden" name="Currency">
-    <button class="CurrencyChangeButton" onclick="ChangeCurrency();"></button>
   </div>
 
   <div class="CalculatedAmount"></div>
@@ -34,31 +32,11 @@
 
   <script type="text/javascript">
     const Amount = document.querySelector("#Amount");
-    const CurrencyChangeButton = document.querySelector(".CurrencyChangeButton");
-    const CurrencyInput = document.querySelector("#CurrencyInput");
     const CalculatedAmount = document.querySelector(".CalculatedAmount");
     const BuyButton = document.querySelector("#BuyWalletCoins");
     const Notification = document.querySelector(".Notification");
 
-    let Currency = "EUR";
     let Price = parseFloat("{{ Price }}");
-
-    ChangeCurrency();
-
-
-
-    function ChangeCurrency() {
-      CurrencyChangeButton.innerHTML = Currency;
-
-      if ( Currency == "EUR" ) {
-        Currency = "WLLC";
-      } else {
-        Currency = "EUR";
-      }
-
-      CurrencyInput.value = Currency;
-    }
-
 
 
     Amount.addEventListener("input", () => {
@@ -79,14 +57,8 @@
 
 
     function MinBetweenMax() {
-      if ( Currency == "EUR" ) {
-        if ( Amount.value >= 10 && Amount.value <= 100000 ) {
-          return true;
-        }
-      } else {
-        if ( Amount.value * Price >= 10 && Amount.value * Price <= 100000 ) {
-          return true;
-        }
+      if ( Amount.value >= 10 && Amount.value <= 100000 ) {
+        return true;
       }
 
       return false;
@@ -99,13 +71,8 @@
         let Final = 0;
 
 
-        if ( Currency == "WLLC" ) {
-          // How much euros is those walletcoins
-          Final = Price * parseInt(Amount.value.toString())
-        } else {
-          // How much walletcoins is those euros
-          Final = parseInt(Amount.value.toString()) / Price
-        }
+        // How much walletcoins is those euros
+        Final = parseInt(Amount.value.toString()) / Price;
         
 
         // Calculate fees
@@ -113,7 +80,7 @@
         Final -= Fee
 
 
-        CalculatedAmount.innerHTML = `= ${Final} ${Currency} ( - ${Fee} Fee )`;
+        CalculatedAmount.innerHTML = `= ${Final} WLLC ( - ${Fee} Fee )`;
         return Final;
       }
     }
